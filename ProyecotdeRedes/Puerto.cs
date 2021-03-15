@@ -14,7 +14,8 @@ namespace ProyecotdeRedes
 
         public Puerto ()
         {
-            this.numerodelPuerto = 1; 
+            this.numerodelPuerto = 1;
+            this.bitdesalida = Bit.none; 
         }
 
         public Bit BitdeSalida
@@ -24,10 +25,8 @@ namespace ProyecotdeRedes
         }
         public Dispositivo DispositivoConectado
         {
-            get => this.DispositivoConectado;
-            set => this.DispositivoConectado = value; 
+            get => this._dispositivoConectado;
+            set => this._dispositivoConectado = value; 
         }
-
-
     }
 }

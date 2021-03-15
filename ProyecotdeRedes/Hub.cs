@@ -6,10 +6,10 @@ namespace ProyecotdeRedes
 {
     class Hub:Dispositivo 
     {
-        int numb_ports; 
-        public Hub()
+        int numeroDePuertos; 
+        public Hub(string name ):base (name)
         {
-            this.numb_ports = 4; 
+            this.numeroDePuertos = 4; 
         }
     }
 }
