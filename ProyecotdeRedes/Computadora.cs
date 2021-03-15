@@ -50,7 +50,6 @@ namespace ProyecotdeRedes
             else
             {
                 //No hubo colicion
-                
                 this.puerto.BitdeSalida = porenviar.Peek();
                 EscribirEnLaSalida(string.Format("{0} {1} send {2} ok", Program.current_time, this.name, (int)this.puerto.BitdeSalida));
 
