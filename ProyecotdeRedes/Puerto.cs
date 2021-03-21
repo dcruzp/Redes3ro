@@ -7,14 +7,10 @@ namespace ProyecotdeRedes
     class Puerto
     {
         Dispositivo _dispositivoConectado;
-
-        uint numerodelPuerto;
-
         Bit bitdesalida; 
 
         public Puerto ()
-        {
-            this.numerodelPuerto = 1;
+        {            
             this.bitdesalida = Bit.none; 
         }
 

@@ -3,6 +3,7 @@ using System.Reflection;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
+using System.Linq; 
 
 namespace ProyecotdeRedes
 {
@@ -12,39 +13,50 @@ namespace ProyecotdeRedes
     {
         public static uint signal_time = 10 ;
         public static uint current_time = 0 ;
-        public static uint tiempomaximo = 1000;
+        public static uint tiempomaximo = 10000;
 
-        public static  List<Instruccion> instrucciones;
+        public static  Queue<Instruccion> instrucciones;
         public static List<Dispositivo> dispositivos; 
         static void Main(string[] args)
         {
-            Computadora cp1 = new Computadora("cp1");
-            Computadora cp2 = new Computadora("cp2");
-
-            Conectar(cp1, cp2);
+            dispositivos = new List<Dispositivo>(); 
 
             LimpiarDirectoriodeSalida();
 
-            Bit[] paquete = { (Bit)1, (Bit)0, (Bit)1, (Bit)1, (Bit)0 };
+            CargarInstrucciones();
 
-            cp1.send(paquete);
-
+            
             while (current_time < tiempomaximo)
             {
-                cp1.IntentarEnviar();
-                cp2.IntentarEnviar();
-                cp1.Recibir();
-                cp2.Recibir();
+                var instruccions = from instr in instrucciones
+                                   where uint.Parse(instr.instruccion.Split(' ')[0]) == current_time
+                                   select instr;
 
+                foreach (var item in instruccions)
+                {
+                    EjecutarInstruccion(item); 
+                }
+
+                foreach (var item in dispositivos)
+                {
+                    if (item is Computadora)
+                    {
+                        Computadora comp = item as Computadora;
+
+                        comp.IntentarEnviar();
+                        comp.Recibir(); 
+                    }
+                }
                 if (current_time % signal_time == 0)
                 {
-                    Console.WriteLine("Pasaron " + signal_time + " milisegundos");
+                    Console.WriteLine("Pasaron " + signal_time + " mili-segundos");
                 }
                 current_time++;
             }
 
-            //CargarInstrucciones(); 
+            
 
+           
         }
 
         public  static void LimpiarDirectoriodeSalida()
@@ -63,20 +75,36 @@ namespace ProyecotdeRedes
             }
             else
             {
-                throw new Exception("La Salida no existe , para borrar el contenodo dentro del directorio"); 
+                throw new Exception("La Salida no existe , para borrar el contenido dentro del directorio"); 
             }
              
         }
 
-        public static void Conectar(Dispositivo disp1, Dispositivo disp2)
+        public static void Conectar(string  port1, string port2)
         {
-            disp1.puerto.DispositivoConectado = disp2;
-            disp2.puerto.DispositivoConectado = disp1;
+            var auxdisp = from dispositivo in dispositivos
+                          where dispositivo.Name == port1.Split('_')[0]
+                          select dispositivo;
+
+            if (!auxdisp.Any()) throw new Exception($"No se encontró el dispositivo '{port1.Split('_')[0]}'");
+
+            Dispositivo disp1 = auxdisp.ToArray()[0];
+
+            auxdisp = from dispositivo in dispositivos
+                      where dispositivo.Name == port2.Split('_')[0]
+                      select dispositivo;
+
+            if (!auxdisp.Any()) throw new Exception($"No se encontró el dispositivo '{port2.Split('_')[0]}'");
+
+            Dispositivo disp2 = auxdisp.ToArray()[0]; 
+
+            disp1[int.Parse(port1.Split('_')[1])-1].DispositivoConectado = disp2;
+            disp2[int.Parse(port2.Split('_')[1])-1].DispositivoConectado = disp1;
         }
 
-        public static void CargarInstrucciones ()
+        public static void CargarInstrucciones()
         {
-            instrucciones = new List<Instruccion>(); 
+            instrucciones = new Queue<Instruccion>(); 
 
             var CurrentDirectory = Environment.CurrentDirectory;
             var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
@@ -91,8 +119,8 @@ namespace ProyecotdeRedes
                 foreach (var item in line)
                 {
                     var instruccion = new Instruccion(item);
-                    instrucciones.Add(instruccion);
-                    EjecutarInstruccion(instruccion);
+                    instrucciones.Enqueue(instruccion);
+                    //EjecutarInstruccion(instrucción);
                 }
             }
             else
@@ -139,7 +167,7 @@ namespace ProyecotdeRedes
                     tipoinstruccion = TipodeInstruccion.disconnect;
                     break;
                 default:
-                    throw new InvalidCastException("el tipo de instruccion no es valida");
+                    throw new InvalidCastException("el tipo de instrucción no es valida");
             }
 
             if (tipoinstruccion == TipodeInstruccion.create)
@@ -167,10 +195,17 @@ namespace ProyecotdeRedes
                     {
                         throw new IndexOutOfRangeException("la cantidad de puertos para un hub no son validos"); 
                     }
+
+                    Hub hub = new Hub(name ,(int)cantidaddepuertos);
+                    Program.dispositivos.Add(hub); 
+
                 }
                 else if (instruccionpartida[2] == "host")
                 {
-                    cantidaddepuertos = 1; 
+                    cantidaddepuertos = 1;
+
+                    Computadora computadora = new Computadora(name);
+                    Program.dispositivos.Add(computadora); 
                 }
             }
 
@@ -180,7 +215,34 @@ namespace ProyecotdeRedes
                     LanzarExepciondeCasteo(instruccion);
 
                 string port1 = instruccionpartida[2];
-                string port2 = instruccionpartida[3]; 
+                string port2 = instruccionpartida[3];
+
+                Dispositivo disp1;
+                Dispositivo disp2;
+
+                IEnumerable<Dispositivo> items  = from dispositivo in dispositivos
+                        where dispositivo.Name == port1.Split('_')[0]
+                        select dispositivo;
+
+                if (items.ToArray().Length != 1 )
+                {
+                    throw new Exception("el Dispositivo no se encontró por el nombre"); 
+                }
+                disp1 = items.ToArray()[0];
+
+
+                items = from dispositivo in dispositivos
+                        where dispositivo.Name == port2.Split('_')[0]
+                        select dispositivo;
+
+                if (items.ToArray().Length != 1)
+                {
+                    throw new Exception("el Dispositivo no se encontró por el nombre");
+                }
+
+                disp2 = items.ToArray()[0];
+
+                Conectar(port1, port2); 
             }
 
             else if (tipoinstruccion == TipodeInstruccion.send)
@@ -193,8 +255,29 @@ namespace ProyecotdeRedes
 
                 if (!Esbinarioelstring(data))
                 {
-                    throw new InvalidCastException($"La informacion '{data}' que se quiere enviar no tiene un formato correcto ");
+                    throw new InvalidCastException($"La información '{data}' que se quiere enviar no tiene un formato correcto ");
                 }
+
+                var disp = from dispositivo in dispositivos
+                           where dispositivo.Name == host.Split('_')[0]
+                           select dispositivo;
+
+                Dispositivo[] comp = disp.ToArray(); 
+                if(comp.Length != 1)
+                {
+                    throw new Exception("no se encontró el dispositivo "); 
+                }
+
+                Computadora computadora = comp[0] as Computadora;
+
+                List<Bit> paquetedebits = new List<Bit>();
+
+                foreach (var item in data)
+                {
+                    paquetedebits.Add((Bit)int.Parse(item.ToString())); 
+                }
+
+                computadora.send(paquetedebits.ToArray()); 
             }
 
             else if (tipoinstruccion == TipodeInstruccion.disconnect)
@@ -209,13 +292,13 @@ namespace ProyecotdeRedes
 
             //Console.WriteLine(tiempodelainstruccion);
 
-            Console.WriteLine("tiempo -> {0}  isntruccion -> {1}" , tiempodelainstruccion ,tipoinstruccion );
+            //Console.WriteLine("tiempo -> {0}  instrucción -> {1}" , tiempodelainstruccion ,tipoinstruccion );
             
         }
 
         static void LanzarExepciondeCasteo(Instruccion instruccion)
         {
-            throw new InvalidCastException($"La instruccion '{instruccion.instruccion}' no tiene un formato válido ");
+            throw new InvalidCastException($"La instrucción '{instruccion.instruccion}' no tiene un formato válido ");
         }
 
         static bool Esbinarioelstring (string numero)

@@ -11,12 +11,13 @@ namespace ProyecotdeRedes
 
         uint tiempoEnviando;
         uint tiempoEnElQuEmpezoAEnviar;
+        uint tiempoesperandoparavolveraenviar; 
 
-
-        public Computadora(string name) : base(name)
+        public Computadora(string name) : base(name ,1)
         {
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
+            this.tiempoEnElQuEmpezoAEnviar = 0; 
             this.porenviar = new Queue<Bit>();
             this.recibidos = new List<Bit>();
         }
@@ -33,25 +34,36 @@ namespace ProyecotdeRedes
         {
             if (porenviar.Count == 0)
             {
-                this.puerto.BitdeSalida = Bit.none; 
+                this[0].BitdeSalida = Bit.none; 
                 return;
             }
 
-            Bit bitleido = this.puerto.DispositivoConectado.puerto.BitdeSalida;
-            Bit bitparaenviar = this.porenviar.Peek();
-
-            Bit xor = Bits.XOR(bitleido, bitparaenviar); 
-
-            if (xor == Bit.cero)
+            if (this.tiempoesperandoparavolveraenviar > 0 )
             {
-                //Hubo colicion
-                this.puerto.BitdeSalida = Bit.none;
+                this.tiempoesperandoparavolveraenviar--;
+                return; 
+            }
+
+            Bit bitparaenviar = this.porenviar.Peek();
+            Bit bitleido = this[0].DispositivoConectado.BitDeSalida(bitparaenviar , this);
+            
+
+            //Bit xor = Bits.XOR(bitleido, bitparaenviar); 
+
+            if (/*xor == Bit.cero*/ Bits.HuboColicion(bitparaenviar,bitleido))
+            {
+                //Hubo colisión
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.name, (int)bitparaenviar));
+                this[0].BitdeSalida = Bit.none;
+                this.tiempoEnviando = 0;
+                
+                this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(20, 50); 
             }
             else
             {
-                //No hubo colicion
-                this.puerto.BitdeSalida = porenviar.Peek();
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} ok", Program.current_time, this.name, (int)this.puerto.BitdeSalida));
+                //No hubo colisión
+                this[0].BitdeSalida = porenviar.Peek();
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} ok", Program.current_time, this.name, (int)this[0].BitdeSalida));
 
                 tiempoEnviando++;
 
@@ -60,17 +72,17 @@ namespace ProyecotdeRedes
                     this.tiempoEnviando = 0;
                     this.tiempoEnElQuEmpezoAEnviar = Program.current_time;
                     this.porenviar.Dequeue();
-                    this.puerto.BitdeSalida = Bit.none; 
+                    //this.puerto.BitdeSalida = Bit.none; 
                 }
             }
         }
         
         public void Recibir()
         {
-            this.recibidos.Add(this.puerto.DispositivoConectado.puerto.BitdeSalida);
-            if (this.puerto.DispositivoConectado.puerto.BitdeSalida != Bit.none)
+            //this.recibidos.Add(this[0].DispositivoConectado[0].BitdeSalida);
+            if (this[0].DispositivoConectado.BitDeSalida(this[0].BitdeSalida,this) != Bit.none)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this.puerto.DispositivoConectado.puerto.BitdeSalida));
+                EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this[0].DispositivoConectado[0].BitdeSalida));
             }
         }
     }

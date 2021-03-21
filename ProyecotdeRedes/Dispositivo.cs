@@ -7,32 +7,48 @@ namespace ProyecotdeRedes
 {
     class Dispositivo
     {
-        Puerto _puerto;
+        Puerto []  puertos;
 
         protected string name; 
 
-        public Dispositivo (string name)
+        public Dispositivo (string name , int cantidaddepuertos )
         {
             this.name = name;
-            this.puerto = new Puerto(); 
+            this.puertos = new Puerto[cantidaddepuertos];
+            for (int i = 0; i < cantidaddepuertos; i++)
+            {
+                this.puertos[i] = new Puerto(); 
+            }
         }
 
-        public Puerto puerto
+        public int NumerodePuertos
         {
-            get => this._puerto;
-            set => this._puerto = value;
+            get => this.puertos.Length; 
         }
 
-        public void EscribirInformacionEnELFichero()
+        public Puerto this [int i]
         {
-            //File.Create("output/" + this.name + ".txt");
-            //FileInfo fileInfo = new FileInfo("output/" + this.name + ".txt"); 
-            //StreamWriter streamWriter = fileInfo.AppendText();
-            //streamWriter.WriteLine("esto es un texto para escribir");
-            //streamWriter.Close();
+            get => this.puertos[i];
+            set => this.puertos[i]  = value;
+        }
 
-            //GenerarTXT(); 
+        public string Name
+        {
+            get => this.name;
+            set => this.name = value; 
+        }
 
+        public Bit BitDeSalida (Bit bitentrada , Dispositivo dispositivodesdeelquesellama)
+        {          
+            foreach (var item in this.puertos)
+            {
+                if (dispositivodesdeelquesellama.Equals(item.DispositivoConectado)) continue;
+                if (item.DispositivoConectado == null) continue; 
+                Bit aux = item.DispositivoConectado.BitDeSalida(bitentrada,this); 
+                if (Bits.HuboColicion(bitentrada, aux))
+                    return aux;
+            }
+            return bitentrada;
         }
 
         public void EscribirEnLaSalida(string recibo)
