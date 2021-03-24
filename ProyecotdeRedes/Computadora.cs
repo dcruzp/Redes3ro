@@ -30,6 +30,14 @@ namespace ProyecotdeRedes
             }
         }
 
+        public void ActualizarElBitDeSalida()
+        {
+            if (this.porenviar.Count > 0)
+                this.BitdeSalida = this.porenviar.Peek();
+            else
+                this.BitdeSalida = Bit.none; 
+        }
+
         public void IntentarEnviar()
         {
             if (porenviar.Count == 0)
@@ -74,11 +82,14 @@ namespace ProyecotdeRedes
         
         public void Recibir()
         {
-            //this.recibidos.Add(this[0].DispositivoConectado[0].BitdeSalida);
+
+
             //if (this[0].DispositivoConectado.BitdeSalida != Bit.none)
             //{
             //    EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this[0].DispositivoConectado[0].BitdeSalida));
             //}
+
+
         }
 
         

@@ -13,7 +13,8 @@ namespace ProyecotdeRedes
 
         protected string name;
 
-        Bit bitsalida; 
+        Bit bitsalida;
+        Bit bitentrada; 
 
         public Dispositivo (string name , int cantidaddepuertos )
         {
@@ -25,6 +26,12 @@ namespace ProyecotdeRedes
         {
             get => this.bitsalida;
             set => this.bitsalida = value;
+        }
+
+        public Bit BitdeEntrada
+        {
+            get => this.bitentrada;
+            set => this.bitentrada = value; 
         }
 
         public int NumerodePuertos
@@ -73,31 +80,6 @@ namespace ProyecotdeRedes
             var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
             return Path.Join(parent.FullName, "output");
 
-        }
-
-        public Bit HuboColicion(Dispositivo dispositivodesdeelquesepregunta)
-        {
-            foreach (var item in this.DispositivosConectados)
-            {
-                if (item != null ||  item.Equals(dispositivodesdeelquesepregunta))
-                {
-                    continue; 
-                }
-
-                Bit bitparapreguntar = item.HuboColicion(this);
-
-                if (bitparapreguntar == Bit.none)
-                {
-                    continue;
-                }
-
-                if (bitparapreguntar != dispositivodesdeelquesepregunta.BitdeSalida)
-                {
-                    return bitparapreguntar == Bit.uno ? Bit.cero : Bit.uno; 
-                }
-            }
-
-            return dispositivodesdeelquesepregunta.BitdeSalida; 
         }
     }
 }
