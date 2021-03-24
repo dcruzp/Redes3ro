@@ -25,7 +25,7 @@ namespace ProyecotdeRedes
 
             CargarInstrucciones();
 
-            
+
             while (current_time < tiempomaximo)
             {
                 var instruccions = from instr in instrucciones
@@ -34,7 +34,7 @@ namespace ProyecotdeRedes
 
                 foreach (var item in instruccions)
                 {
-                    EjecutarInstruccion(item); 
+                    EjecutarInstruccion(item);
                 }
 
                 foreach (var item in dispositivos)
@@ -44,7 +44,7 @@ namespace ProyecotdeRedes
                         Computadora comp = item as Computadora;
 
                         comp.IntentarEnviar();
-                        comp.Recibir(); 
+                        comp.Recibir();
                     }
                 }
                 if (current_time % signal_time == 0)
@@ -54,9 +54,9 @@ namespace ProyecotdeRedes
                 current_time++;
             }
 
-            
 
-           
+
+
         }
 
         public  static void LimpiarDirectoriodeSalida()
@@ -80,27 +80,7 @@ namespace ProyecotdeRedes
              
         }
 
-        public static void Conectar(string  port1, string port2)
-        {
-            var auxdisp = from dispositivo in dispositivos
-                          where dispositivo.Name == port1.Split('_')[0]
-                          select dispositivo;
-
-            if (!auxdisp.Any()) throw new Exception($"No se encontró el dispositivo '{port1.Split('_')[0]}'");
-
-            Dispositivo disp1 = auxdisp.ToArray()[0];
-
-            auxdisp = from dispositivo in dispositivos
-                      where dispositivo.Name == port2.Split('_')[0]
-                      select dispositivo;
-
-            if (!auxdisp.Any()) throw new Exception($"No se encontró el dispositivo '{port2.Split('_')[0]}'");
-
-            Dispositivo disp2 = auxdisp.ToArray()[0]; 
-
-            disp1[int.Parse(port1.Split('_')[1])-1].DispositivoConectado = disp2;
-            disp2[int.Parse(port2.Split('_')[1])-1].DispositivoConectado = disp1;
-        }
+       
 
         public static void CargarInstrucciones()
         {
@@ -144,7 +124,7 @@ namespace ProyecotdeRedes
 
             if (! UInt32.TryParse(instruccionpartida[0],out tiempodelainstruccion))
             {
-                throw new FormatException("el tiempo de la instrucción no tiene un formato válido ");
+                throw new FormatException($"no tiene un formato válido '{instruccionpartida[0]}' para ser el tiempo de una instruccion ");
             }
 
             if (instruccionpartida.Length < 2)
@@ -167,7 +147,7 @@ namespace ProyecotdeRedes
                     tipoinstruccion = TipodeInstruccion.disconnect;
                     break;
                 default:
-                    throw new InvalidCastException("el tipo de instrucción no es valida");
+                    throw new InvalidCastException($" '{instruccionpartida[1]}' no ese un tipo de instrucción valida");
             }
 
             if (tipoinstruccion == TipodeInstruccion.create)
@@ -188,7 +168,7 @@ namespace ProyecotdeRedes
 
                     if (!UInt32.TryParse(instruccionpartida[4], out cantidaddepuertos))
                     {
-                        throw new FormatException("La cantidad de puertos de la instrucción no tiene un formato válido");
+                        throw new FormatException($"La cantidad de puertos '{instruccionpartida[4]}' de la instrucción no tiene un formato válido");
                     }
 
                     if (cantidaddepuertos < 4 || cantidaddepuertos > 8)
@@ -220,29 +200,26 @@ namespace ProyecotdeRedes
                 Dispositivo disp1;
                 Dispositivo disp2;
 
-                IEnumerable<Dispositivo> items  = from dispositivo in dispositivos
-                        where dispositivo.Name == port1.Split('_')[0]
-                        select dispositivo;
+                disp1 = dispositivos.Where(disp => disp.Name.Contains(port1.Split('_').FirstOrDefault())).FirstOrDefault();
 
-                if (items.ToArray().Length != 1 )
+                if (disp1 == null)
                 {
-                    throw new Exception("el Dispositivo no se encontró por el nombre"); 
-                }
-                disp1 = items.ToArray()[0];
-
-
-                items = from dispositivo in dispositivos
-                        where dispositivo.Name == port2.Split('_')[0]
-                        select dispositivo;
-
-                if (items.ToArray().Length != 1)
-                {
-                    throw new Exception("el Dispositivo no se encontró por el nombre");
+                    throw new KeyNotFoundException($"No hay ningún dispositivo cuyo nombre sea {port1.Split('_')}");
                 }
 
-                disp2 = items.ToArray()[0];
+                disp2 = dispositivos.Where(disp => disp.Name.Contains(port2.Split('_').FirstOrDefault())).FirstOrDefault();
 
-                Conectar(port1, port2); 
+
+                if (disp2 == null)
+                {
+                    throw new KeyNotFoundException($"No hay ningún dispositivo cuyo nombre sea {port2.Split('_')}");
+                }
+
+                int numeroport1 = int.Parse(port1.Split('_')[1]) - 1;
+                int numeroport2 = int.Parse(port2.Split('_')[1]) - 1;
+
+                disp1[numeroport1] = disp2;
+                disp2[numeroport2] = disp1; 
             }
 
             else if (tipoinstruccion == TipodeInstruccion.send)
@@ -311,6 +288,43 @@ namespace ProyecotdeRedes
                 }
             }
             return true; 
+        }
+
+           
+
+
+        public static bool  HuboUnaColicion (Dispositivo disp )
+        {
+            Queue<Dispositivo> cola = new Queue<Dispositivo>();
+            bool[] mask = new bool[Program.dispositivos.Count];
+            mask[dispositivos.IndexOf(disp)] = true; 
+            cola.Enqueue(disp);
+
+            Dispositivo current;
+
+            while(cola.Count > 0 )
+            {
+                current = cola.Dequeue(); 
+
+                foreach (var item in current.DispositivosConectados)
+                {
+                    if (item is null) continue; 
+
+                    int indice = dispositivos.IndexOf(item);
+                    if (mask[indice]) continue;
+
+                    if (item.BitdeSalida != Bit.none && item.BitdeSalida != disp.BitdeSalida)
+                    {
+                        return true; 
+                    }
+
+                    mask[indice] = true;
+
+                    cola.Enqueue(item); 
+                }
+            }
+
+            return false; 
         }
     }
 }

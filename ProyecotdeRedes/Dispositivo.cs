@@ -7,29 +7,35 @@ namespace ProyecotdeRedes
 {
     class Dispositivo
     {
-        Puerto []  puertos;
+        //Puerto []  puertos;
 
-        protected string name; 
+        Dispositivo[] dispositivosConectados; 
+
+        protected string name;
+
+        Bit bitsalida; 
 
         public Dispositivo (string name , int cantidaddepuertos )
         {
             this.name = name;
-            this.puertos = new Puerto[cantidaddepuertos];
-            for (int i = 0; i < cantidaddepuertos; i++)
-            {
-                this.puertos[i] = new Puerto(); 
-            }
+            this.dispositivosConectados = new Dispositivo[cantidaddepuertos];
+        }
+
+        public Bit BitdeSalida
+        {
+            get => this.bitsalida;
+            set => this.bitsalida = value;
         }
 
         public int NumerodePuertos
         {
-            get => this.puertos.Length; 
+            get => this.dispositivosConectados.Length; 
         }
 
-        public Puerto this [int i]
+        public Dispositivo this [int i]
         {
-            get => this.puertos[i];
-            set => this.puertos[i]  = value;
+            get => this.dispositivosConectados[i];
+            set => this.dispositivosConectados[i]  = value;
         }
 
         public string Name
@@ -38,18 +44,12 @@ namespace ProyecotdeRedes
             set => this.name = value; 
         }
 
-        public Bit BitDeSalida (Bit bitentrada , Dispositivo dispositivodesdeelquesellama)
-        {          
-            foreach (var item in this.puertos)
-            {
-                if (dispositivodesdeelquesellama.Equals(item.DispositivoConectado)) continue;
-                if (item.DispositivoConectado == null) continue; 
-                Bit aux = item.DispositivoConectado.BitDeSalida(bitentrada,this); 
-                if (Bits.HuboColicion(bitentrada, aux))
-                    return aux;
-            }
-            return bitentrada;
+        public IEnumerable<Dispositivo> DispositivosConectados
+        {
+            get => this.dispositivosConectados; 
         }
+
+       
 
         public void EscribirEnLaSalida(string recibo)
         {
@@ -73,6 +73,31 @@ namespace ProyecotdeRedes
             var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
             return Path.Join(parent.FullName, "output");
 
+        }
+
+        public Bit HuboColicion(Dispositivo dispositivodesdeelquesepregunta)
+        {
+            foreach (var item in this.DispositivosConectados)
+            {
+                if (item != null ||  item.Equals(dispositivodesdeelquesepregunta))
+                {
+                    continue; 
+                }
+
+                Bit bitparapreguntar = item.HuboColicion(this);
+
+                if (bitparapreguntar == Bit.none)
+                {
+                    continue;
+                }
+
+                if (bitparapreguntar != dispositivodesdeelquesepregunta.BitdeSalida)
+                {
+                    return bitparapreguntar == Bit.uno ? Bit.cero : Bit.uno; 
+                }
+            }
+
+            return dispositivodesdeelquesepregunta.BitdeSalida; 
         }
     }
 }

@@ -43,17 +43,12 @@ namespace ProyecotdeRedes
                 this.tiempoesperandoparavolveraenviar--;
                 return; 
             }
-
-            Bit bitparaenviar = this.porenviar.Peek();
-            Bit bitleido = this[0].DispositivoConectado.BitDeSalida(bitparaenviar , this);
             
-
-            //Bit xor = Bits.XOR(bitleido, bitparaenviar); 
-
-            if (/*xor == Bit.cero*/ Bits.HuboColicion(bitparaenviar,bitleido))
+            
+            if (Program.HuboUnaColicion(this))
             {
                 //Hubo colisión
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.name, (int)bitparaenviar));
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.name, (int)this.BitdeSalida));
                 this[0].BitdeSalida = Bit.none;
                 this.tiempoEnviando = 0;
                 
@@ -62,8 +57,8 @@ namespace ProyecotdeRedes
             else
             {
                 //No hubo colisión
-                this[0].BitdeSalida = porenviar.Peek();
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} ok", Program.current_time, this.name, (int)this[0].BitdeSalida));
+                this.BitdeSalida = porenviar.Peek();
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, this.name, (int)this.BitdeSalida));
 
                 tiempoEnviando++;
 
@@ -80,10 +75,12 @@ namespace ProyecotdeRedes
         public void Recibir()
         {
             //this.recibidos.Add(this[0].DispositivoConectado[0].BitdeSalida);
-            if (this[0].DispositivoConectado.BitDeSalida(this[0].BitdeSalida,this) != Bit.none)
-            {
-                EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this[0].DispositivoConectado[0].BitdeSalida));
-            }
+            //if (this[0].DispositivoConectado.BitdeSalida != Bit.none)
+            //{
+            //    EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this[0].DispositivoConectado[0].BitdeSalida));
+            //}
         }
+
+        
     }
 }
