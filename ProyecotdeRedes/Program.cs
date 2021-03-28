@@ -7,8 +7,6 @@ using System.Linq;
 
 namespace ProyecotdeRedes
 {
-    
-
     class Program
     {
         public static uint signal_time = 10 ;
@@ -37,16 +35,24 @@ namespace ProyecotdeRedes
                     EjecutarInstruccion(item);
                 }
 
-                foreach (var item in dispositivos.Where(e => e  is Computadora))
+                foreach (var item in dispositivos.Where(e=>e is Computadora))
                 {
                     Computadora comp = item as Computadora;
                     comp.ActualizarElBitDeSalida();
+                }
+
+                foreach (var item in dispositivos.Where(e => e  is Computadora))
+                {
+                    Computadora comp = item as Computadora;
 
                     bool hubocolicion = HuboUnaColicion(comp); 
-
-                    if (comp.BitdeSalida != Bit.none && !hubocolicion)
+                    if (hubocolicion)
                     {
-                        ActualizarelBitdeEntrada(comp);
+
+                    }
+                    else if (comp.BitdeSalida != Bit.none && !hubocolicion)
+                    {
+                        //if (ActualizarelBitdeEntrada(comp))
                         comp.EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, comp.Name, (int)comp.BitdeSalida));
                     }
                 }
@@ -54,20 +60,17 @@ namespace ProyecotdeRedes
                 foreach (var item in dispositivos.Where(e => e is Computadora))
                 {
                     Computadora comp = item as Computadora;
+                    ActualizarelBitdeEntrada(comp);
                     if (comp.BitdeEntrada != Bit.none)
                         comp.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, comp.Name, (int)comp.BitdeEntrada));
                 }
 
-                    if (current_time % signal_time == 0)
-                {
-                    Console.WriteLine("Pasaron " + signal_time + " mili-segundos");
-                }
+                //if (current_time % signal_time == 0)
+                //{
+                //    Console.WriteLine("Pasaron " + signal_time + " mili-segundos");
+                //}
                 current_time++;
             }
-
-
-
-
         }
 
         public  static void LimpiarDirectoriodeSalida()
@@ -187,7 +190,7 @@ namespace ProyecotdeRedes
                         throw new IndexOutOfRangeException("la cantidad de puertos para un hub no son validos"); 
                     }
 
-                    Hub hub = new Hub(name ,(int)cantidaddepuertos);
+                    Hub hub = new Hub(name ,(int)cantidaddepuertos,Program.dispositivos.Count);
                     Program.dispositivos.Add(hub); 
 
                 }
@@ -195,7 +198,7 @@ namespace ProyecotdeRedes
                 {
                     cantidaddepuertos = 1;
 
-                    Computadora computadora = new Computadora(name);
+                    Computadora computadora = new Computadora(name ,Program.dispositivos.Count);
                     Program.dispositivos.Add(computadora); 
                 }
             }
@@ -306,7 +309,7 @@ namespace ProyecotdeRedes
         {
             Queue<Dispositivo> cola = new Queue<Dispositivo>();
             bool[] mask = new bool[Program.dispositivos.Count];
-            mask[dispositivos.IndexOf(disp)] = true; 
+            mask[disp.Indice] = true; 
             cola.Enqueue(disp);
 
             Dispositivo current;
@@ -319,7 +322,7 @@ namespace ProyecotdeRedes
                 {
                     if (item is null) continue; 
 
-                    int indice = dispositivos.IndexOf(item);
+                    int indice = item.Indice;
                     if (mask[indice]) continue;
 
                     if (item is Computadora && item.BitdeSalida != Bit.none && item.BitdeSalida != disp.BitdeSalida)
@@ -337,11 +340,12 @@ namespace ProyecotdeRedes
         }
 
 
-        public static void ActualizarelBitdeEntrada(Dispositivo disp)
+        public static bool ActualizarelBitdeEntrada(Dispositivo disp)
         {
+            disp.BitdeEntrada = Bit.none;
             Queue<Dispositivo> cola = new Queue<Dispositivo>();
             bool[] mask = new bool[Program.dispositivos.Count];
-            mask[dispositivos.IndexOf(disp)] = true;
+            mask[disp.Indice] = true;
             cola.Enqueue(disp);
 
             Dispositivo current;
@@ -349,20 +353,38 @@ namespace ProyecotdeRedes
             while (cola.Count > 0)
             {
                 current = cola.Dequeue();
-                current.BitdeEntrada = disp.BitdeSalida; 
 
                 foreach (var item in current.DispositivosConectados)
                 {
                     if (item is null) continue;
 
-                    int indice = dispositivos.IndexOf(item);
+                    int indice = item.Indice;
                     if (mask[indice]) continue;
+
+                    if (item is Computadora)
+                    {
+                        Computadora computadora = item as Computadora; 
+
+                        if (computadora.BitdeSalida != Bit.none)
+                        {
+                            if (disp.BitdeEntrada == Bit.none)
+                            {
+                                disp.BitdeEntrada = computadora.BitdeSalida;
+                            }
+                            else if (computadora.BitdeSalida != disp.BitdeEntrada)
+                            {
+                                disp.BitdeEntrada = Bit.none; 
+                                return false; 
+                            }
+                        }
+                    }
 
                     mask[indice] = true;
 
                     cola.Enqueue(item);
                 }
             }
+            return true;
         }
     }
 }

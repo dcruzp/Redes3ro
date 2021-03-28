@@ -13,7 +13,7 @@ namespace ProyecotdeRedes
         uint tiempoEnElQuEmpezoAEnviar;
         uint tiempoesperandoparavolveraenviar; 
 
-        public Computadora(string name) : base(name ,1)
+        public Computadora(string name ,int indice) : base(name ,1 , indice)
         {
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
@@ -32,10 +32,23 @@ namespace ProyecotdeRedes
 
         public void ActualizarElBitDeSalida()
         {
-            if (this.porenviar.Count > 0)
-                this.BitdeSalida = this.porenviar.Peek();
+            if (this.porenviar.Count == 0)
+                this.BitdeSalida = Bit.none;
             else
-                this.BitdeSalida = Bit.none; 
+            {
+                this.BitdeSalida = porenviar.Peek();
+                //EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, this.name, (int)this.BitdeSalida));
+
+                tiempoEnviando++;
+
+                if (tiempoEnviando >= Program.signal_time)
+                {
+                    this.tiempoEnviando = 0;
+                    this.tiempoEnElQuEmpezoAEnviar = Program.current_time;
+                    this.porenviar.Dequeue();
+                    //this.puerto.BitdeSalida = Bit.none; 
+                }
+            }
         }
 
         public void IntentarEnviar()

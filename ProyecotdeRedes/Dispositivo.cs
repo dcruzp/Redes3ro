@@ -14,12 +14,23 @@ namespace ProyecotdeRedes
         protected string name;
 
         Bit bitsalida;
-        Bit bitentrada; 
+        Bit bitentrada;
 
-        public Dispositivo (string name , int cantidaddepuertos )
+        int indice; 
+
+        public Dispositivo (string name , int cantidaddepuertos , int indice )
         {
             this.name = name;
             this.dispositivosConectados = new Dispositivo[cantidaddepuertos];
+            this.bitsalida = Bit.none;
+            this.bitentrada = Bit.none;
+            this.indice = indice; 
+        }
+
+
+        public int Indice
+        {
+            get => this.indice;
         }
 
         public Bit BitdeSalida
@@ -62,11 +73,10 @@ namespace ProyecotdeRedes
         {
 
             string rutaCompleta = Path.Join(DirectorioDeSalida(),this.name + ".txt");
-           
-            using (StreamWriter mylogs = File.AppendText(rutaCompleta))         //se crea el archivo
-            {
-                //se adiciona alguna información y la fecha
 
+            //se crea el archivo si no existe y lo abre y ya existe 
+            using (StreamWriter mylogs = File.AppendText(rutaCompleta))      
+            {
                 mylogs.WriteLine(recibo);
 
                 mylogs.Close();

@@ -7,12 +7,12 @@ namespace ProyecotdeRedes
     class Hub:Dispositivo 
     {
         
-        public Hub(string name ):base (name , 4)
+        public Hub(string name ,int indice):base (name , 4,indice)
         {
             
         }
 
-        public Hub (string name , int numerodepuertos):base(name , numerodepuertos)
+        public Hub (string name , int numerodepuertos , int indice):base(name , numerodepuertos,indice)
         {
             if (numerodepuertos < 4 || numerodepuertos > 8)
             {
