@@ -11,7 +11,7 @@ namespace ProyecotdeRedes
     {
         public static uint signal_time = 10 ;
         public static uint current_time = 0 ;
-        public static uint tiempomaximo = 200;
+        public static uint tiempomaximo = 1000;
 
         public static  Queue<Instruccion> instrucciones;
         public static List<Dispositivo> dispositivos; 
@@ -45,14 +45,18 @@ namespace ProyecotdeRedes
                 {
                     Computadora comp = item as Computadora;
 
-                    bool hubocolicion = HuboUnaColicion(comp); 
+                    if (comp.BitdeSalida == Bit.none) continue;
+                   
+                    bool hubocolicion = HuboUnaColicion(comp);
+
+                   
                     if (hubocolicion)
                     {
-
+                        comp.Actualizar();
+                        comp.EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, comp.Name, (int)comp.BitdeSalida));
                     }
-                    else if (comp.BitdeSalida != Bit.none && !hubocolicion)
+                    else
                     {
-                        //if (ActualizarelBitdeEntrada(comp))
                         comp.EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, comp.Name, (int)comp.BitdeSalida));
                     }
                 }
@@ -64,11 +68,7 @@ namespace ProyecotdeRedes
                     if (comp.BitdeEntrada != Bit.none)
                         comp.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, comp.Name, (int)comp.BitdeEntrada));
                 }
-
-                //if (current_time % signal_time == 0)
-                //{
-                //    Console.WriteLine("Pasaron " + signal_time + " mili-segundos");
-                //}
+                
                 current_time++;
             }
         }
@@ -335,7 +335,6 @@ namespace ProyecotdeRedes
                     cola.Enqueue(item); 
                 }
             }
-
             return false; 
         }
 
