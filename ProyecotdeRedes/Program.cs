@@ -68,6 +68,28 @@ namespace ProyecotdeRedes
                     if (comp.BitdeEntrada != Bit.none)
                         comp.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, comp.Name, (int)comp.BitdeEntrada));
                 }
+
+                foreach (var item in dispositivos.Where(e => e is Hub))
+                {
+                    Hub hub = item as Hub;
+                    hub.ActualizarlaEntrada();
+                    if (hub.BitdeSalida!= Bit.none)
+                    {
+                        for (int i = 0; i < hub.BitsDeEntrada.Length; i++)
+                        {
+                            if (hub[i] == null) continue;
+                            
+                            if (hub.BitsDeEntrada[i] == hub.BitdeSalida)
+                            {
+                                hub.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, hub.Name + $"_{i+1}", (int)hub.BitdeSalida));
+                            }
+                            else
+                            {
+                                hub.EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, hub.Name +$"_{i+1}", (int)hub.BitdeSalida));
+                            }
+                        }
+                    }
+                }
                 
                 current_time++;
             }

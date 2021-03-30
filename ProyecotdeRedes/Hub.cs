@@ -22,7 +22,12 @@ namespace ProyecotdeRedes
             this.bitsdeentradas = new Bit[numerodepuertos];
         }
 
-        public void Actualizarlaentrada()
+        public Bit [] BitsDeEntrada
+        {
+            get => this.bitsdeentradas;
+        }
+
+        public void ActualizarlaEntrada()
         {
             this.BitdeSalida = Bit.none;
             bool hubounacolicion = false; 
@@ -31,6 +36,23 @@ namespace ProyecotdeRedes
                 bitsdeentradas[i] = Bit.none;
 
                 if (this[i] == null) continue;
+
+                if (this[i] is Computadora)
+                {
+                    Computadora comp = this[i] as Computadora;
+
+                    if (comp.BitdeSalida == Bit.none)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        this.bitsdeentradas[i] = comp.BitdeSalida; 
+                    }
+                    continue; 
+                }
+
+
 
                 bool[] mask = new bool[Program.dispositivos.Count];
                 mask[this.Indice] = true;
@@ -65,6 +87,8 @@ namespace ProyecotdeRedes
                                 hubounacolicion = true;
                             }
                         }
+
+                        queue.Enqueue(item);
                     }
 
                 }   
