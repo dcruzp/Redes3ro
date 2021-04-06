@@ -15,7 +15,7 @@ namespace ProyecotdeRedes
 
         public Hub (string name , int numerodepuertos , int indice):base(name , numerodepuertos,indice)
         {
-            if (numerodepuertos < 4 || numerodepuertos > 8)
+            if (numerodepuertos < Program.cantidadminimadepuertosdeunhub || numerodepuertos > Program.cantidadmaximadepuertosdeunhub)
             {
                 throw new IndexOutOfRangeException("No se puede tener un hub con menos de 4 puertos o mas de 8 "); 
             }
@@ -87,7 +87,6 @@ namespace ProyecotdeRedes
                                 hubounacolicion = true;
                             }
                         }
-
                         queue.Enqueue(item);
                     }
 
@@ -118,6 +117,5 @@ namespace ProyecotdeRedes
             this.BitdeSalida = bit; 
             return false; 
         }
-       
     }
 }

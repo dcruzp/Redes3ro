@@ -9,22 +9,77 @@ namespace ProyecotdeRedes
 {
     class Program
     {
+        /// <summary>
+        /// tiempo que demora un bit transmitiéndose por un canal 
+        /// </summary>
         public static uint signal_time = 10 ;
-        public static uint current_time = 0 ;
-        public static uint tiempomaximo = 1000;
 
+        /// <summary>
+        /// mili-segundo actual , por el que va ejecutándose el programa
+        /// </summary>
+        public static uint current_time = 0 ;
+
+        /// <summary>
+        /// Tiempo máximo que puede corres el programa (la medida de tiempo es como mili-segundos)
+        /// </summary>
+        public static uint tiempo_maximo = 1000000;
+
+
+        /// <summary>
+        /// Cantidad mínima de puertos que puede tener un hub
+        /// </summary>
+        public static int cantidadminimadepuertosdeunhub = 4;
+
+        /// <summary>
+        /// Cantidad máxima de puertos que puede tener un hub
+        /// </summary>
+        public static int cantidadmaximadepuertosdeunhub = 8; 
+
+
+
+
+        /// <summary>
+        /// Cola de instrucciones que son cargadas al principio del programa 
+        /// para después ser ejecutadas según llegue su momento 
+        /// </summary>
         public static  Queue<Instruccion> instrucciones;
+
+        /// <summary>
+        /// Lista de dispositivos que actualmente en el entorno 
+        /// El tamaño de la sita va creciendo a medida que se ejecute 
+        /// correctamente una instrucción de create 
+        /// </summary>
         public static List<Dispositivo> dispositivos; 
+        
+        
+        
         static void Main(string[] args)
         {
-            dispositivos = new List<Dispositivo>(); 
+            dispositivos = new List<Dispositivo>();
 
+            
+            //Esto limpia el directorio de la salida (es decir borra todos los ficheros que hay 
+            //en el directorio '/output') para que en la ejecución no se vayan a sobre escribir 
+            //sobre ficheros ya existentes 
             LimpiarDirectoriodeSalida();
 
+
+
+            //Esta es para cargar todos las instrucciones que hay en el fichero 'script.txt' 
+            //para almacenarlos en memoria , todas las instrucciones que hay en el fichero quedan 
+            //almacenadas en instrucciones. 
             CargarInstrucciones();
 
 
-            while (current_time < tiempomaximo)
+
+            //Este métodos es para configurar todo el entorno del programa ,como signal_time , cantidad
+            //máxima de mili-segundos que debe correr el programa , etc 
+            Configurar(); 
+
+
+            //Este es el ciclo principal para correr las instrucciones y hacer el envió de 
+            //información entre host 
+            while (current_time < tiempo_maximo)
             {
                 var instruccions = from instr in instrucciones
                                    where uint.Parse(instr.instruccion.Split(' ')[0]) == current_time
@@ -35,21 +90,21 @@ namespace ProyecotdeRedes
                     EjecutarInstruccion(item);
                 }
 
-                foreach (var item in dispositivos.Where(e=>e is Computadora))
+                foreach (var item in dispositivos.Where(e => e is Computadora))
                 {
                     Computadora comp = item as Computadora;
                     comp.ActualizarElBitDeSalida();
                 }
 
-                foreach (var item in dispositivos.Where(e => e  is Computadora))
+                foreach (var item in dispositivos.Where(e => e is Computadora))
                 {
                     Computadora comp = item as Computadora;
 
                     if (comp.BitdeSalida == Bit.none) continue;
-                   
+
                     bool hubocolicion = HuboUnaColicion(comp);
 
-                   
+
                     if (hubocolicion)
                     {
                         comp.Actualizar();
@@ -73,26 +128,130 @@ namespace ProyecotdeRedes
                 {
                     Hub hub = item as Hub;
                     hub.ActualizarlaEntrada();
-                    if (hub.BitdeSalida!= Bit.none)
+                    if (hub.BitdeSalida != Bit.none)
                     {
                         for (int i = 0; i < hub.BitsDeEntrada.Length; i++)
                         {
                             if (hub[i] == null) continue;
-                            
+
                             if (hub.BitsDeEntrada[i] == hub.BitdeSalida)
                             {
-                                hub.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, hub.Name + $"_{i+1}", (int)hub.BitdeSalida));
+                                hub.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, hub.Name + $"_{i + 1}", (int)hub.BitdeSalida));
                             }
                             else
                             {
-                                hub.EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, hub.Name +$"_{i+1}", (int)hub.BitdeSalida));
+                                hub.EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, hub.Name + $"_{i + 1}", (int)hub.BitdeSalida));
                             }
                         }
                     }
                 }
-                
+
                 current_time++;
             }
+
+            //Console.WriteLine($"Signal_time {Program.signal_time}\nCantidad mínima de puertos que puede tener un hub:{Program.cantidadminimadepuertosdeunhub} \nCantidad mínima de puertos que puede tener un hub:{Program.cantidadmaximadepuertosdeunhub}");
+        }
+
+
+        public static void PonerConfiguracionPorDefecto ()
+        {
+            Program.cantidadminimadepuertosdeunhub = 4;
+            Program.cantidadminimadepuertosdeunhub = 8;
+            Program.signal_time = 10;
+            Program.tiempo_maximo = 1000000; 
+        }
+
+        public static void Configurar()
+        {
+            var CurrentDirectory = Environment.CurrentDirectory;
+            var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
+
+            string rutaCompleta = Path.Join(parent.FullName, "config.txt");
+
+            if (! File.Exists(rutaCompleta))
+            {
+                PonerConfiguracionPorDefecto();
+                Console.WriteLine($"Advertencia: El fichero 'config.txt' no existe\n las configuraciones que se van a poner son las que hay por defecto");
+                return;                
+            }
+
+            var variable = File.ReadLines(rutaCompleta);
+
+
+            foreach (var item in variable)
+            {
+                if (item.Length < 1) continue; 
+
+                string[] configuracionpartida = item.Split(':');
+              
+                if (configuracionpartida.Length < 2) throw new InvalidCastException($"la configuración {item} no tiene el formato correcto"); 
+
+                switch(configuracionpartida[0])
+                {
+                    case "max_cantidad_milisegundos":
+                        UInt32 _tiempo_maximo; 
+                        if (UInt32.TryParse(configuracionpartida[1],out _tiempo_maximo))
+                        {
+                            Program.tiempo_maximo = _tiempo_maximo; 
+                        }
+                        else
+                        {
+                            throw new InvalidCastException($"el numero para asignarle al tiempo_maximo: '{configuracionpartida[1]} no es valido '"); 
+                        }
+                        break; 
+
+                    case "signal_time":
+                        int _signal_time;
+                        if (Int32.TryParse(configuracionpartida[1], out _signal_time))
+                        {
+                            Program.signal_time = (uint)_signal_time; 
+                        }
+                        else
+                        {
+                            throw new InvalidCastException($"el numero para asignarle el _signal_time '{configuracionpartida[1]}' no tiene el formato correcto"); 
+                        }
+                        break;
+                    case "numero_puertos_hub":
+                        string[] extremosdelintervalo = configuracionpartida[1].Split('-');
+
+                        if (extremosdelintervalo.Length<2)
+                        {
+                            throw new InvalidCastException($"No tiene el formato correcto los intervalos '{extremosdelintervalo}'");
+                        }
+
+                        int min, max;
+
+                        if (! int.TryParse(extremosdelintervalo[0], out min))
+                        {
+                            throw new InvalidCastException($"El extremo {extremosdelintervalo[0]} no es un numero valido "); 
+                        }
+                        if (!int.TryParse(extremosdelintervalo[1], out max))
+                        {
+                            throw new InvalidCastException($"El extremo {extremosdelintervalo[1]} no es un numero valido ");
+                        }
+
+                        if (sonvalidoslacantidaddepuertosdeunhub(min,max))
+                        {
+                            Program.cantidadminimadepuertosdeunhub = min;
+                            Program.cantidadmaximadepuertosdeunhub = max; 
+                        }
+                        break; 
+
+                }
+            }
+        }
+
+        public static bool sonvalidoslacantidaddepuertosdeunhub(int a , int b)
+        {
+            if (a < 4 )
+            {
+                throw new InvalidCastException("Un hub no puede tener menos de 4 puertos "); 
+            }
+            if (b<=a)
+            {
+                throw new InvalidCastException("La cantidad máxima de puertos no puede ser menor o igual que la cantidad mínima de puertos");
+            }
+            return true; 
         }
 
         public  static void LimpiarDirectoriodeSalida()
@@ -295,17 +454,25 @@ namespace ProyecotdeRedes
 
             else if (tipoinstruccion == TipodeInstruccion.disconnect)
             {
-                if (instruccionpartida.Length < 3)
+                if (instruccionpartida.Length < 4)
                     LanzarExepciondeCasteo(instruccion);
 
-                string port = instruccionpartida[2];
+                string port1 = instruccionpartida[2];
+                string port2 = instruccionpartida[3]; 
+
+                Dispositivo dispositivo1 = dispositivos.Where(x => x.Name == instruccionpartida[2].Split('_')[0]).FirstOrDefault();
+                Dispositivo dispositivo2 = dispositivos.Where(x => x.Name == instruccionpartida[3].Split('_')[0]).FirstOrDefault();
+
+                if (dispositivo1 == null)
+                    throw new InvalidCastException($"El puerto {port1} al que se esta tratando de acceder no existe ");
+
+                if (dispositivo2 == null)
+                    throw new InvalidCastException($"El puerto {port2} al que se esta tratando de acceder no existe ");
+
+                dispositivo1[int.Parse(port1.Split('_')[1])-1] = null;
+                dispositivo2[int.Parse(port2.Split('_')[1])-1] = null; 
+
             }
-
-            //Console.WriteLine(tipoinstruccion);
-
-            //Console.WriteLine(tiempodelainstruccion);
-
-            //Console.WriteLine("tiempo -> {0}  instrucción -> {1}" , tiempodelainstruccion ,tipoinstruccion );
             
         }
 

@@ -8,7 +8,7 @@ namespace ProyecotdeRedes
     {
         create = 0,
         connect = 1, 
-        send = 3, 
+        send = 2, 
         disconnect=3
     }
 }

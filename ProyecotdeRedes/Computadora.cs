@@ -13,7 +13,7 @@ namespace ProyecotdeRedes
         uint tiempoEnElQuEmpezoAEnviar;
         uint tiempoesperandoparavolveraenviar; 
 
-        public Computadora(string name ,int indice) : base(name ,1 , indice)
+        public Computadora(string name ,int indice) : base(name ,1, indice)
         {
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
@@ -30,7 +30,6 @@ namespace ProyecotdeRedes
         }
             
 
-
         public void send(Bit [] paquete)
         {
             foreach (var item in paquete)
@@ -46,7 +45,6 @@ namespace ProyecotdeRedes
             else
             {
                
-                
                 if (this.tiempoesperandoparavolveraenviar > 0)
                 {
                     this.tiempoesperandoparavolveraenviar--;
