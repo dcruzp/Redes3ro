@@ -24,7 +24,7 @@ namespace ProyecotdeRedes
 
         public void Actualizar()
         {
-            this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(2 , 20);
+            this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(2 , 50);
             Console.WriteLine($"{this.name}  va a esperar {this.tiempoesperandoparavolveraenviar} para volver a enviar un dato");
             this.tiempoEnviando = 0;
         }
@@ -64,15 +64,5 @@ namespace ProyecotdeRedes
                 }
             }
         }
-
-        public void Recibir()
-        {
-            //if (this[0].DispositivoConectado.BitdeSalida != Bit.none)
-            //{
-            //    EscribirEnLaSalida(string.Format("{0} {1} receive {2}", Program.current_time, this.name, (int)this[0].DispositivoConectado[0].BitdeSalida));
-            //}
-        }
-
-        
     }
 }

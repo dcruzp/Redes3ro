@@ -55,9 +55,26 @@ namespace ProyecotdeRedes
         
         static void Main(string[] args)
         {
+            CorrerlaAplicacion(); 
+
+            //EscribirlaInformacionenConsola(); 
+        }
+
+        public static void EscribirlaInformacionenConsola()
+        {
+            Console.ReadKey(); 
+            Console.Clear();
+            Console.WriteLine($"TIME : {Program.current_time}");
+           // Console.ReadKey();
+            
+        }
+        
+
+        public static void CorrerlaAplicacion ()
+        {
             dispositivos = new List<Dispositivo>();
 
-            
+
             //Esto limpia el directorio de la salida (es decir borra todos los ficheros que hay 
             //en el directorio '/output') para que en la ejecución no se vayan a sobre escribir 
             //sobre ficheros ya existentes 
@@ -67,33 +84,36 @@ namespace ProyecotdeRedes
 
             //Esta es para cargar todos las instrucciones que hay en el fichero 'script.txt' 
             //para almacenarlos en memoria , todas las instrucciones que hay en el fichero quedan 
-            //almacenadas en instrucciones. 
+            //almacenadas en instrucciones , ordenadas por el tiempo de ejecución de la instrucción 
+            //de forma ascendente, para que una vez hallan sido ejecutadas salgan de la cola.  
             CargarInstrucciones();
 
 
 
             //Este métodos es para configurar todo el entorno del programa ,como signal_time , cantidad
             //máxima de mili-segundos que debe correr el programa , etc 
-            Configurar(); 
+            Configurar();
 
 
             //Este es el ciclo principal para correr las instrucciones y hacer el envió de 
-            //información entre host 
+            //información entre todos los host que están conectados.
             while (current_time < tiempo_maximo)
             {
-                var instruccions = from instr in instrucciones
-                                   where uint.Parse(instr.instruccion.Split(' ')[0]) == current_time
-                                   select instr;
 
-                foreach (var item in instruccions)
+                //Console.WriteLine($"TIME : {Program.current_time} millisecond");
+                //EscribirlaInformacionenConsola(); 
+
+                //Ejecutar las instrucciones que corresponden a ejecutarse en el 
+                //mili-segundo actual que están en la cola de instrucciones ; 
+                foreach (var item in ProximasInstruccionesEjecutar(current_time))
                 {
                     EjecutarInstruccion(item);
                 }
 
+
                 foreach (var item in dispositivos.Where(e => e is Computadora))
                 {
-                    Computadora comp = item as Computadora;
-                    comp.ActualizarElBitDeSalida();
+                    (item as Computadora).ActualizarElBitDeSalida();
                 }
 
                 foreach (var item in dispositivos.Where(e => e is Computadora))
@@ -104,15 +124,19 @@ namespace ProyecotdeRedes
 
                     bool hubocolicion = HuboUnaColicion(comp);
 
-
                     if (hubocolicion)
                     {
                         comp.Actualizar();
-                        comp.EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, comp.Name, (int)comp.BitdeSalida));
+                        string textoaescribirenlasalidas = string.Format("{0} {1} send {2} collision", Program.current_time, comp.Name, (int)comp.BitdeSalida);
+                        comp.EscribirEnLaSalida(textoaescribirenlasalidas);
+                        Console.WriteLine(textoaescribirenlasalidas);
+
                     }
                     else
                     {
-                        comp.EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, comp.Name, (int)comp.BitdeSalida));
+                        string textoaescribirenlasalidas = string.Format("{0} {1} send {2} OK", Program.current_time, comp.Name, (int)comp.BitdeSalida); 
+                        comp.EscribirEnLaSalida(textoaescribirenlasalidas);
+                        Console.WriteLine(textoaescribirenlasalidas);
                     }
                 }
 
@@ -146,11 +170,13 @@ namespace ProyecotdeRedes
                     }
                 }
 
-                current_time++;
+                current_time++;                
             }
 
             //Console.WriteLine($"Signal_time {Program.signal_time}\nCantidad mínima de puertos que puede tener un hub:{Program.cantidadminimadepuertosdeunhub} \nCantidad mínima de puertos que puede tener un hub:{Program.cantidadmaximadepuertosdeunhub}");
         }
+
+
 
 
         public static void PonerConfiguracionPorDefecto ()
@@ -276,27 +302,21 @@ namespace ProyecotdeRedes
         }
 
        
-
         public static void CargarInstrucciones()
         {
             instrucciones = new Queue<Instruccion>(); 
+            
+            var directorio = Directory.GetParent(Directory.GetParent(Directory.GetParent(Environment.CurrentDirectory).FullName).FullName);
 
-            var CurrentDirectory = Environment.CurrentDirectory;
-            var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
+            var directoriodelfichero = Path.Join(directorio.FullName, "input", "script.txt" );
 
-            var script = Path.Join(parent.FullName, "input", "script.txt" );
-
-            if (File.Exists(script))
+            if (File.Exists(directoriodelfichero))
             {
-                IEnumerable<string> line = File.ReadLines(script);
-                //Console.WriteLine(String.Join(Environment.NewLine, line));
+                IEnumerable<Instruccion> lines = from inst in File.ReadLines(directoriodelfichero)
+                                            orderby int.Parse(inst.Split(' ')[0]) ascending
+                                            select new Instruccion(inst);
 
-                foreach (var item in line)
-                {
-                    var instruccion = new Instruccion(item);
-                    instrucciones.Enqueue(instruccion);
-                    //EjecutarInstruccion(instrucción);
-                }
+                instrucciones = new Queue<Instruccion>(lines); 
             }
             else
             {
@@ -493,7 +513,13 @@ namespace ProyecotdeRedes
             return true; 
         }
 
-
+        private static IEnumerable<Instruccion> ProximasInstruccionesEjecutar (uint time)
+        {
+            while(Program.instrucciones.Count > 0 && Program.instrucciones.Peek().Time <= time)
+            {
+                yield return Program.instrucciones.Dequeue(); 
+            }
+        }
         public static bool  HuboUnaColicion (Dispositivo disp )
         {
             Queue<Dispositivo> cola = new Queue<Dispositivo>();
