@@ -24,7 +24,7 @@ namespace ProyecotdeRedes
 
         public void Actualizar()
         {
-            this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(2 , 50);
+            this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(5,50);
             Console.WriteLine($"{this.name}  va a esperar {this.tiempoesperandoparavolveraenviar} para volver a enviar un dato");
             this.tiempoEnviando = 0;
         }
@@ -38,8 +38,16 @@ namespace ProyecotdeRedes
             }
         }
 
+
+        public bool NoEstaConectada()
+        {
+            return this[0] == null; 
+        }
+
         public void ActualizarElBitDeSalida()
         {
+            if (this[0] == null) return; 
+
             if (this.porenviar.Count == 0)
                 this.BitdeSalida = Bit.none;
             else

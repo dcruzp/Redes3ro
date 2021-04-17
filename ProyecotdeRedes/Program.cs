@@ -120,7 +120,7 @@ namespace ProyecotdeRedes
                 {
                     Computadora comp = item as Computadora;
 
-                    if (comp.BitdeSalida == Bit.none) continue;
+                    if (comp.BitdeSalida == Bit.none || comp.NoEstaConectada()) continue;
 
                     bool hubocolicion = HuboUnaColicion(comp);
 
