@@ -7,16 +7,18 @@ namespace ProyecotdeRedes
 {
     class Dispositivo
     {
-        //Puerto []  puertos;
 
         Dispositivo[] dispositivosConectados; 
 
         protected string name;
 
-        Bit bitsalida;
+        bool[,] entradas; 
+
+        protected Bit bitsalida;
         Bit bitentrada;
 
-        int indice; 
+        protected int indice;
+        protected int cantidaddepuertos; 
 
         public Dispositivo (string name , int cantidaddepuertos , int indice )
         {
@@ -24,7 +26,9 @@ namespace ProyecotdeRedes
             this.dispositivosConectados = new Dispositivo[cantidaddepuertos];
             this.bitsalida = Bit.none;
             this.bitentrada = Bit.none;
-            this.indice = indice; 
+            this.indice = indice;
+            this.cantidaddepuertos = cantidaddepuertos; 
+            this.entradas = new bool[this.cantidaddepuertos, Enum.GetNames(typeof(Bit)).Length];
         }
 
 
@@ -89,7 +93,21 @@ namespace ProyecotdeRedes
             var CurrentDirectory = Environment.CurrentDirectory;
             var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
             return Path.Join(parent.FullName, "output");
+        }
 
+        public int PuertoPorElQueEstaConectado (Dispositivo disp)
+        {
+            for (int i = 0; i < this.dispositivosConectados.Length; i++)
+            {
+                if (dispositivosConectados[i].Equals(disp)) return i; 
+            }
+            return -1; 
+        }
+
+
+        public void recibirUnBit (int puerto, Bit bit)
+        {
+            this.entradas[puerto, (int)bit] = true;
         }
     }
 }

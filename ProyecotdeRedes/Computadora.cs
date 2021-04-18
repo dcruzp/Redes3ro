@@ -7,10 +7,12 @@ namespace ProyecotdeRedes
     class Computadora:Dispositivo
     {
         Queue<Bit> porenviar;
-        List<Bit> recibidos; 
+        
+        bool [] recibidos; 
 
         uint tiempoEnviando;
         uint tiempoEnElQuEmpezoAEnviar;
+
         uint tiempoesperandoparavolveraenviar; 
 
         public Computadora(string name ,int indice) : base(name ,1, indice)
@@ -19,7 +21,7 @@ namespace ProyecotdeRedes
             this.tiempoEnElQuEmpezoAEnviar = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0; 
             this.porenviar = new Queue<Bit>();
-            this.recibidos = new List<Bit>();
+            this.recibidos = new bool[Enum.GetNames(typeof(Bit)).Length]; 
         }
 
         public void Actualizar()
@@ -69,6 +71,44 @@ namespace ProyecotdeRedes
                     this.tiempoEnviando = 0;
                     this.tiempoEnElQuEmpezoAEnviar = Program.current_time;
                     this.porenviar.Dequeue();                    
+                }
+            }
+        }
+
+        public void EnviarElBitQueHayEnLaSalidaALasDemasComputadoras()
+        {
+            
+
+            Queue<Dispositivo> queue = new Queue<Dispositivo>();
+            bool[] mask = new bool[Program.dispositivos.Count];
+            mask[this.indice]= true; 
+            queue.Enqueue(this);
+
+            Dispositivo current; 
+
+            while(queue.Count>0)
+            {
+                current = queue.Dequeue();
+
+                foreach (var item in current.DispositivosConectados)
+                {
+                    if(mask[item.Indice]) continue;
+
+
+                    int puertoporelqueestaconectado = item.PuertoPorElQueEstaConectado(current);
+
+                    if (puertoporelqueestaconectado != -1)
+                        item.recibirUnBit(puertoporelqueestaconectado, this.bitsalida);
+
+                    //if(item is Computadora)
+                    //{
+                    //    Computadora comp = item as Computadora;
+
+                    //    comp.recibirUnBit(0,this.bitsalida); 
+                    //}
+
+                    mask[item.Indice] = true;
+                    queue.Enqueue(item); 
                 }
             }
         }

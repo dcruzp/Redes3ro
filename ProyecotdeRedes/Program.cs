@@ -60,16 +60,6 @@ namespace ProyecotdeRedes
             //EscribirlaInformacionenConsola(); 
         }
 
-        public static void EscribirlaInformacionenConsola()
-        {
-            Console.ReadKey(); 
-            Console.Clear();
-            Console.WriteLine($"TIME : {Program.current_time}");
-           // Console.ReadKey();
-            
-        }
-        
-
         public static void CorrerlaAplicacion ()
         {
             dispositivos = new List<Dispositivo>();
