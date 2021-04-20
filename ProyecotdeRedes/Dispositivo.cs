@@ -122,32 +122,30 @@ namespace ProyecotdeRedes
             return Path.Join(parent.FullName, "output");
         }
 
-        public int PuertoPorElQueEstaConectado(Dispositivo disp)
-        {
-            for (int i = 0; i < this.dispositivosConectados.Length; i++)
-            {
-                if (disp.Equals(dispositivosConectados[i])) return i; 
-            }
-            return -1; 
-        }
-
 
         public void recibirUnBit (int puerto, Bit bit)
         {
             this.entradas[puerto, (int)bit] = true;
+            this.puertos[puerto].RecibirUnBit(bit); 
         }
 
         public bool HuboUnaColision()
         {
             this.bitentrada = Bit.none;
 
-            bool cero = false , uno = false; 
-            
-            for (int i = 0; i < this.cantidaddepuertos; i++)
+            bool cero = false , uno = false;
+
+            foreach (var item in this.PuertosConectados)
             {
-                if (entradas[i,(int)Bit.uno]) uno =true ;
-                if (entradas[i, (int)Bit.cero]) cero = true; 
+                if (item.Entradas[(int)Bit.cero]) cero = true;
+                if (item.Entradas[(int)Bit.uno]) uno = true; 
             }
+
+            //for (int i = 0; i < this.cantidaddepuertos; i++)
+            //{
+            //    if (entradas[i,(int)Bit.uno]) uno =true ;
+            //    if (entradas[i, (int)Bit.cero]) cero = true; 
+            //}
             if (uno && cero) return true;
             else if (uno) this.bitentrada = Bit.uno;
             else if (cero) this.bitentrada = Bit.cero;
@@ -160,9 +158,17 @@ namespace ProyecotdeRedes
         {
             bool hubocolision = HuboUnaColision();
 
-            if (hubocolision) return;
+            if (hubocolision)
+            {
+                LimpiarLosParametrosDeEntrada();
+                return;
+            }
 
-            if (this.bitentrada == Bit.none) return; 
+            if (this.bitentrada == Bit.none)
+            {
+                LimpiarLosParametrosDeEntrada(); 
+                return;
+            }
 
             for (int i = 0; i < this.cantidaddepuertos; i++)
             {
@@ -183,6 +189,12 @@ namespace ProyecotdeRedes
                     this.entradas[i, j] = false; 
                 }
             }
+
+            foreach (var item in this.PuertosConectados)
+            {
+                item.LimpiarEntradas();
+            }
+
             this.BitdeEntrada = Bit.none; 
         }
 

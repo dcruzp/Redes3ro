@@ -90,8 +90,8 @@ namespace ProyecotdeRedes
             while (current_time < tiempo_maximo)
             {
 
-                //Console.WriteLine($"TIME : {Program.current_time} millisecond");
-                //EscribirlaInformacionenConsola(); 
+                Console.WriteLine($"CURRENT TIME : {Program.current_time} mili-second");
+               
 
                 //Ejecutar las instrucciones que corresponden a ejecutarse en el 
                 //mili-segundo actual que están en la cola de instrucciones ; 
@@ -99,88 +99,30 @@ namespace ProyecotdeRedes
                 {
                     EjecutarInstruccion(item);
                 }
-
-
-                Console.WriteLine($"Esta corriendo el mili-segundo {Program.current_time}");
-
+              
+                //Actualizar el bit de salida de cada computadora para despues 
+                //enviar el bit que esta en la salida a cada uno de los 
+                //Dispositivos a los que esta conectado la Computadora
                 foreach (var item in dispositivos.Where(e => e is Computadora))
                 {
                     Computadora comp = item as Computadora; 
                     comp.EnviarInformacionALasDemasComputadoras(); 
                 }
 
+                
                 foreach (var item in dispositivos)
                 {
                     item.ProcesarInformacionDeSalidaYDeEntrada();
                 }
 
-               
-                //Console.ReadKey(); 
-
-                //foreach (var item in dispositivos.Where(e => e is Computadora))
-                //{
-                //    Computadora comp = item as Computadora;
-
-                //    if (comp.BitdeSalida == Bit.none || comp.NoEstaConectada()) continue;
-
-                //    bool hubocolicion = HuboUnaColicion(comp);
-
-                //    if (hubocolicion)
-                //    {
-                //        comp.Actualizar();
-                //        string textoaescribirenlasalidas = string.Format("{0} {1} send {2} collision", Program.current_time, comp.Name, (int)comp.BitdeSalida);
-                //        comp.EscribirEnLaSalida(textoaescribirenlasalidas);
-                //        Console.WriteLine(textoaescribirenlasalidas);
-
-                //    }
-                //    else
-                //    {
-                //        string textoaescribirenlasalidas = string.Format("{0} {1} send {2} OK", Program.current_time, comp.Name, (int)comp.BitdeSalida); 
-                //        comp.EscribirEnLaSalida(textoaescribirenlasalidas);
-                //        Console.WriteLine(textoaescribirenlasalidas);
-                //    }
-                //}
-
-                //foreach (var item in dispositivos.Where(e => e is Computadora))
-                //{
-                //    Computadora comp = item as Computadora;
-                //    ActualizarelBitdeEntrada(comp);
-                //    if (comp.BitdeEntrada != Bit.none)
-                //        comp.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, comp.Name, (int)comp.BitdeEntrada));
-                //}
-
-                //foreach (var item in dispositivos.Where(e => e is Hub))
-                //{
-                //    Hub hub = item as Hub;
-                //    hub.ActualizarlaEntrada();
-                //    if (hub.BitdeSalida != Bit.none)
-                //    {
-                //        for (int i = 0; i < hub.BitsDeEntrada.Length; i++)
-                //        {
-                //            if (hub[i] == null) continue;
-
-                //            if (hub.BitsDeEntrada[i] == hub.BitdeSalida)
-                //            {
-                //                hub.EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, hub.Name + $"_{i + 1}", (int)hub.BitdeSalida));
-                //            }
-                //            else
-                //            {
-                //                hub.EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, hub.Name + $"_{i + 1}", (int)hub.BitdeSalida));
-                //            }
-                //        }
-                //    }
-                //}
-
+                //Aumentar el contador de mili-segundos para pasar a procesar 
+                //el próximo mili-segundo para ejecutar las instrucciones
                 current_time++;                
             }
-
-            //Console.WriteLine($"Signal_time {Program.signal_time}\nCantidad mínima de puertos que puede tener un hub:{Program.cantidadminimadepuertosdeunhub} \nCantidad mínima de puertos que puede tener un hub:{Program.cantidadmaximadepuertosdeunhub}");
         }
 
 
-
-
-        public static void PonerConfiguracionPorDefecto ()
+        public static void PonerConfiguracionPorDefecto()
         {
             Program.cantidadminimadepuertosdeunhub = 4;
             Program.cantidadminimadepuertosdeunhub = 8;
@@ -331,8 +273,6 @@ namespace ProyecotdeRedes
 
             string [] instruccionpartida = _instruccion.Split(" ");
 
-            //Console.WriteLine(String.Join(Environment.NewLine , instruccionpartida));
-
             if (instruccionpartida.Length < 1)
                 LanzarExepciondeCasteo(instruccion);
 
@@ -444,7 +384,10 @@ namespace ProyecotdeRedes
                 p2.DispositivoConectado = disp1;
 
                 p1.PuertoAlQueEstaConnectado = port2;
-                p2.PuertoAlQueEstaConnectado = port1; 
+                p2.PuertoAlQueEstaConnectado = port1;
+
+                p1.EstaConectadoAOtroDispositivo = true;
+                p2.EstaConectadoAOtroDispositivo = true; 
 
             }
 

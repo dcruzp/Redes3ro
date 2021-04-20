@@ -25,7 +25,7 @@ namespace ProyecotdeRedes
 
         public int NumeroPuertoAlQueEstaConectado
         {
-            get =>  int.Parse(this.puertoalqueestaconectado.Split('_')[1]);
+            get =>  (int.Parse(this.puertoalqueestaconectado.Split('_')[1]) -1);
         } 
 
 
@@ -64,6 +64,22 @@ namespace ProyecotdeRedes
         {
             get => this._dispositivoConectado;
             set => this._dispositivoConectado = value; 
+        }
+
+        public bool [] Entradas
+        {
+            get => this.entradas; 
+        }
+
+        public void LimpiarEntradas()
+        {
+            for (int i = 0; i < this.entradas.Length; i++)
+                this.entradas[i] = false; 
+        }
+
+        public void RecibirUnBit (Bit bit)
+        {
+            this.entradas[(int)bit] = true; 
         }
     }
 }

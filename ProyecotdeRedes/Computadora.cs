@@ -102,16 +102,8 @@ namespace ProyecotdeRedes
                     Dispositivo dispconectado = item.DispositivoConectado;
                     if (mask[dispconectado.Indice]) continue;
 
-                    //int puertoporelqueestaconectado = item.PuertoPorElQueEstaConectado(current);
-
-
-                    //-------------------------------esto es para hacer una prueba -----------------------------------------
                     int puertoporelqueestaconectado = item.NumeroPuertoAlQueEstaConectado;
-                    //------------------------------------------------------------------------------------------------------
-
-                    //if (puertoporelqueestaconectado != -1)
-                    //    item.recibirUnBit(puertoporelqueestaconectado, this.bitsalida);
-
+                   
                     dispconectado.recibirUnBit(puertoporelqueestaconectado, this.bitsalida); 
                     
                     mask[dispconectado.Indice] = true;
@@ -134,12 +126,12 @@ namespace ProyecotdeRedes
             }
             else if (this.BitdeSalida != Bit.none)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, this.Name, (int)this.BitdeSalida));
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} Ok", Program.current_time, this.Name, (int)this.BitdeSalida));
             }
             
             if (this.BitdeEntrada != Bit.none)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} receive {2} OK", Program.current_time, this.Name, (int)this.BitdeEntrada));
+                EscribirEnLaSalida(string.Format("{0} {1} receive {2} Ok", Program.current_time, this.Name, (int)this.BitdeEntrada));
             }
 
             base.LimpiarLosParametrosDeEntrada();
