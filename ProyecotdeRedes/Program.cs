@@ -100,7 +100,7 @@ namespace ProyecotdeRedes
                     EjecutarInstruccion(item);
                 }
               
-                //Actualizar el bit de salida de cada computadora para despues 
+                //Actualizar el bit de salida de cada computadora para después 
                 //enviar el bit que esta en la salida a cada uno de los 
                 //Dispositivos a los que esta conectado la Computadora
                 foreach (var item in dispositivos.Where(e => e is Computadora))
@@ -374,8 +374,8 @@ namespace ProyecotdeRedes
                 int numeroport1 = int.Parse(port1.Split('_')[1]) - 1;
                 int numeroport2 = int.Parse(port2.Split('_')[1]) - 1;
 
-                disp1[numeroport1] = disp2;
-                disp2[numeroport2] = disp1;
+                //disp1[numeroport1] = disp2;
+                //disp2[numeroport2] = disp1;
 
                 Puerto p1 = disp1.DameElPuerto(numeroport1);
                 Puerto p2 = disp2.DameElPuerto(numeroport2);
@@ -443,8 +443,8 @@ namespace ProyecotdeRedes
                 if (dispositivo2 == null)
                     throw new InvalidCastException($"El puerto {port2} al que se esta tratando de acceder no existe ");
 
-                dispositivo1[int.Parse(port1.Split('_')[1])-1] = null;
-                dispositivo2[int.Parse(port2.Split('_')[1])-1] = null; 
+                //dispositivo1[int.Parse(port1.Split('_')[1])-1] = null;
+                //dispositivo2[int.Parse(port2.Split('_')[1])-1] = null; 
 
             }
             
@@ -474,84 +474,85 @@ namespace ProyecotdeRedes
                 yield return Program.instrucciones.Dequeue(); 
             }
         }
-        public static bool  HuboUnaColicion (Dispositivo disp )
-        {
-            Queue<Dispositivo> cola = new Queue<Dispositivo>();
-            bool[] mask = new bool[Program.dispositivos.Count];
-            mask[disp.Indice] = true; 
-            cola.Enqueue(disp);
+       
+        //public static bool  HuboUnaColicion (Dispositivo disp )
+        //{
+        //    Queue<Dispositivo> cola = new Queue<Dispositivo>();
+        //    bool[] mask = new bool[Program.dispositivos.Count];
+        //    mask[disp.Indice] = true; 
+        //    cola.Enqueue(disp);
 
-            Dispositivo current;
+        //    Dispositivo current;
 
-            while(cola.Count > 0 )
-            {
-                current = cola.Dequeue(); 
+        //    while(cola.Count > 0 )
+        //    {
+        //        current = cola.Dequeue(); 
 
-                foreach (var item in current.DispositivosConectados)
-                {
-                    if (item is null) continue; 
+        //        foreach (var item in current.DispositivosConectados)
+        //        {
+        //            if (item is null) continue; 
 
-                    int indice = item.Indice;
-                    if (mask[indice]) continue;
+        //            int indice = item.Indice;
+        //            if (mask[indice]) continue;
 
-                    if (item is Computadora && item.BitdeSalida != Bit.none && item.BitdeSalida != disp.BitdeSalida)
-                    {
-                        return true; 
-                    }
+        //            if (item is Computadora && item.BitdeSalida != Bit.none && item.BitdeSalida != disp.BitdeSalida)
+        //            {
+        //                return true; 
+        //            }
 
-                    mask[indice] = true;
+        //            mask[indice] = true;
 
-                    cola.Enqueue(item); 
-                }
-            }
-            return false; 
-        }
+        //            cola.Enqueue(item); 
+        //        }
+        //    }
+        //    return false; 
+        //}
 
-        public static bool ActualizarelBitdeEntrada(Dispositivo disp)
-        {
-            disp.BitdeEntrada = Bit.none;
-            Queue<Dispositivo> cola = new Queue<Dispositivo>();
-            bool[] mask = new bool[Program.dispositivos.Count];
-            mask[disp.Indice] = true;
-            cola.Enqueue(disp);
+        //public static bool ActualizarelBitdeEntrada(Dispositivo disp)
+        //{
+        //    disp.BitdeEntrada = Bit.none;
+        //    Queue<Dispositivo> cola = new Queue<Dispositivo>();
+        //    bool[] mask = new bool[Program.dispositivos.Count];
+        //    mask[disp.Indice] = true;
+        //    cola.Enqueue(disp);
 
-            Dispositivo current;
+        //    Dispositivo current;
 
-            while (cola.Count > 0)
-            {
-                current = cola.Dequeue();
+        //    while (cola.Count > 0)
+        //    {
+        //        current = cola.Dequeue();
 
-                foreach (var item in current.DispositivosConectados)
-                {
-                    if (item is null) continue;
+        //        foreach (var item in current.DispositivosConectados)
+        //        {
+        //            if (item is null) continue;
 
-                    int indice = item.Indice;
-                    if (mask[indice]) continue;
+        //            int indice = item.Indice;
+        //            if (mask[indice]) continue;
 
-                    if (item is Computadora)
-                    {
-                        Computadora computadora = item as Computadora; 
+        //            if (item is Computadora)
+        //            {
+        //                Computadora computadora = item as Computadora; 
 
-                        if (computadora.BitdeSalida != Bit.none)
-                        {
-                            if (disp.BitdeEntrada == Bit.none)
-                            {
-                                disp.BitdeEntrada = computadora.BitdeSalida;
-                            }
-                            else if (computadora.BitdeSalida != disp.BitdeEntrada)
-                            {
-                                disp.BitdeEntrada = Bit.none; 
-                                return false; 
-                            }
-                        }
-                    }
+        //                if (computadora.BitdeSalida != Bit.none)
+        //                {
+        //                    if (disp.BitdeEntrada == Bit.none)
+        //                    {
+        //                        disp.BitdeEntrada = computadora.BitdeSalida;
+        //                    }
+        //                    else if (computadora.BitdeSalida != disp.BitdeEntrada)
+        //                    {
+        //                        disp.BitdeEntrada = Bit.none; 
+        //                        return false; 
+        //                    }
+        //                }
+        //            }
 
-                    mask[indice] = true;
+        //            mask[indice] = true;
 
-                    cola.Enqueue(item);
-                }
-            }
-            return true;
-        }
+        //            cola.Enqueue(item);
+        //        }
+        //    }
+        //    return true;
+        //}
     }
 }

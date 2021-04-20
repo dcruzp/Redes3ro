@@ -8,12 +8,11 @@ namespace ProyecotdeRedes
     class Dispositivo
     {
 
-        protected Dispositivo[] dispositivosConectados;
+        //protected Dispositivo[] dispositivosConectados;
 
         protected Puerto[] puertos; 
 
-        protected string name;
-        protected bool[,] entradas; 
+        protected string name;       
 
         protected Bit bitsalida;
         protected Bit bitentrada;
@@ -23,13 +22,11 @@ namespace ProyecotdeRedes
 
         public Dispositivo (string name , int cantidaddepuertos , int indice )
         {
-            this.name = name;
-            this.dispositivosConectados = new Dispositivo[cantidaddepuertos];
+            this.name = name;            
             this.bitsalida = Bit.none;
             this.bitentrada = Bit.none;
             this.indice = indice;
-            this.cantidaddepuertos = cantidaddepuertos; 
-            this.entradas = new bool[this.cantidaddepuertos, Enum.GetNames(typeof(Bit)).Length];
+            this.cantidaddepuertos = cantidaddepuertos;             
 
             this.puertos = new Puerto[cantidaddepuertos];
 
@@ -48,7 +45,7 @@ namespace ProyecotdeRedes
         public Bit BitdeSalida
         {
             get => this.bitsalida;
-            set => this.bitsalida = value;
+            //set => this.bitsalida = value;
         }
 
         public Bit BitdeEntrada
@@ -59,14 +56,14 @@ namespace ProyecotdeRedes
 
         public int NumerodePuertos
         {
-            get => this.dispositivosConectados.Length; 
+            get => this.cantidaddepuertos; 
         }
 
-        public Dispositivo this [int i]
-        {
-            get => this.dispositivosConectados[i];
-            set => this.dispositivosConectados[i]  = value;
-        }
+        //public Dispositivo this [int i]
+        //{
+        //    get => this.dispositivosConectados[i];
+        //    set => this.dispositivosConectados[i]  = value;
+        //}
 
         public string Name
         {
@@ -91,15 +88,15 @@ namespace ProyecotdeRedes
             }
         }
 
-        public IEnumerable<Dispositivo> DispositivosConectados
-        {
-            get
-            {
-                foreach (var item in this.puertos)                
-                    if (item.DispositivoConectado != null) 
-                        yield return item.DispositivoConectado;
-            }
-        }
+        //public IEnumerable<Dispositivo> DispositivosConectados
+        //{
+        //    get
+        //    {
+        //        foreach (var item in this.puertos)                
+        //            if (item.DispositivoConectado != null) 
+        //                yield return item.DispositivoConectado;
+        //    }
+        //}
 
         public void EscribirEnLaSalida(string recibo)
         {
@@ -125,14 +122,13 @@ namespace ProyecotdeRedes
 
         public void recibirUnBit (int puerto, Bit bit)
         {
-            this.entradas[puerto, (int)bit] = true;
+            //this.entradas[puerto, (int)bit] = true;
             this.puertos[puerto].RecibirUnBit(bit); 
         }
 
         public bool HuboUnaColision()
         {
             this.bitentrada = Bit.none;
-
             bool cero = false , uno = false;
 
             foreach (var item in this.PuertosConectados)
@@ -146,6 +142,7 @@ namespace ProyecotdeRedes
             //    if (entradas[i,(int)Bit.uno]) uno =true ;
             //    if (entradas[i, (int)Bit.cero]) cero = true; 
             //}
+
             if (uno && cero) return true;
             else if (uno) this.bitentrada = Bit.uno;
             else if (cero) this.bitentrada = Bit.cero;
@@ -170,25 +167,30 @@ namespace ProyecotdeRedes
                 return;
             }
 
+            StringBuilder salida = new StringBuilder(); 
+
             for (int i = 0; i < this.cantidaddepuertos; i++)
             {
-                if (this.entradas[i, (int)Bit.cero]) EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)Bit.cero));
-                else if (this.entradas[i, (int)Bit.uno]) EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)Bit.uno));
-                else EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)this.BitdeEntrada));
+                if (this.puertos[i] == null) continue; 
+
+                if (this.puertos[i].Entradas[(int)Bit.cero] || this.puertos[i].Entradas[(int)Bit.uno])
+                {
+                    salida.Append(string.Format("{0} {1} receive {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.bitentrada));
+                }
+                else
+                {
+                    salida.Append(string.Format("{0} {1} send {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.BitdeEntrada)); 
+                }
             }
+
+            EscribirEnLaSalida(salida.ToString()); 
+            
 
             LimpiarLosParametrosDeEntrada();
         }
 
         protected void LimpiarLosParametrosDeEntrada()
         {
-            for (int i = 0; i < this.entradas.GetLength(0); i++)
-            {
-                for (int j = 0; j < this.entradas.GetLength(1); j++)
-                {
-                    this.entradas[i, j] = false; 
-                }
-            }
 
             foreach (var item in this.PuertosConectados)
             {
@@ -206,17 +208,16 @@ namespace ProyecotdeRedes
 
             stringBuilder.Append($"Bit de Salida:\t {(int)this.BitdeSalida}\n");
 
-            stringBuilder.Append($"Bit de Entradas:\n"); 
-            for (int i = 0; i < this.entradas.GetLength(0); i++)
-            {
-                for (int j = 0; j < this.entradas.GetLength(1); j++)
-                {
+            stringBuilder.Append($"Bit de Entradas:\n");
 
-                    stringBuilder.Append($"{ (this.entradas[i, j] == true ?"T" : "F")}  ");
+            foreach (var item in this.PuertosConectados)            
+            {
+                for (int j = 0; j < item.Entradas.Length; j++)
+                {
+                    stringBuilder.Append($"{ (item.Entradas[j] == true ?"T" : "F")}  ");
                 }
                 stringBuilder.Append(Environment.NewLine);
             }
-
 
             stringBuilder.Append(Environment.NewLine);
 

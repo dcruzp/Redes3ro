@@ -39,13 +39,14 @@ namespace ProyecotdeRedes
 
         public bool NoEstaConectada()
         {
-            return this[0] == null; 
+            // return this[0] == null;
+            return this.PuertosConectados == null; 
         }
 
         public bool EnviarInformacionALasDemasComputadoras()
         {
-            if (this.dispositivosConectados[0] == null)
-                return false; 
+            //if (this.dispositivosConectados[0] == null)
+            //    return false; 
             
             ActualizarElBitDeSalida();
             EnviarElBitQueHayEnLaSalidaALasDemasComputadoras();
@@ -55,11 +56,11 @@ namespace ProyecotdeRedes
 
         public void ActualizarElBitDeSalida()
         {
-            if (this[0] == null) return;
+            //if (this[0] == null) return;
 
             if (this.porenviar.Count == 0)
             {
-                this.BitdeSalida = Bit.none;
+                this.bitsalida = Bit.none;
             }
             else
             {
@@ -67,11 +68,11 @@ namespace ProyecotdeRedes
                 if (this.tiempoesperandoparavolveraenviar > 0)
                 {
                     this.tiempoesperandoparavolveraenviar--;
-                    this.BitdeSalida = Bit.none;
+                    this.bitsalida = Bit.none;
                     return;
                 }
 
-                this.BitdeSalida = porenviar.Peek();
+                this.bitsalida = porenviar.Peek();
 
                 tiempoEnviando++;
 
