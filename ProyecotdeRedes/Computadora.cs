@@ -8,8 +8,6 @@ namespace ProyecotdeRedes
     {
         Queue<Bit> porenviar;
         
-        bool [] recibidos; 
-
         uint tiempoEnviando;
         uint tiempoEnElQuEmpezoAEnviar;
 
@@ -19,9 +17,7 @@ namespace ProyecotdeRedes
         {
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
-            this.tiempoEnElQuEmpezoAEnviar = 0; 
             this.porenviar = new Queue<Bit>();
-            this.recibidos = new bool[Enum.GetNames(typeof(Bit)).Length]; 
         }
 
         public void Actualizar()
@@ -30,7 +26,8 @@ namespace ProyecotdeRedes
             Console.WriteLine($"{this.name}  va a esperar {this.tiempoesperandoparavolveraenviar} para volver a enviar un dato");
             this.tiempoEnviando = 0;
         }
-            
+        
+       
 
         public void send(Bit [] paquete)
         {
@@ -40,25 +37,37 @@ namespace ProyecotdeRedes
             }
         }
 
-
         public bool NoEstaConectada()
         {
             return this[0] == null; 
         }
 
+        public bool EnviarInformacionALasDemasComputadoras()
+        {
+            if (this.dispositivosConectados[0] == null)
+                return false; 
+            
+            ActualizarElBitDeSalida();
+            EnviarElBitQueHayEnLaSalidaALasDemasComputadoras();
+
+            return true; 
+        }
+
         public void ActualizarElBitDeSalida()
         {
-            if (this[0] == null) return; 
+            if (this[0] == null) return;
 
             if (this.porenviar.Count == 0)
+            {
                 this.BitdeSalida = Bit.none;
+            }
             else
             {
-               
+
                 if (this.tiempoesperandoparavolveraenviar > 0)
                 {
                     this.tiempoesperandoparavolveraenviar--;
-                    this.BitdeSalida = Bit.none; 
+                    this.BitdeSalida = Bit.none;
                     return;
                 }
 
@@ -70,15 +79,13 @@ namespace ProyecotdeRedes
                 {
                     this.tiempoEnviando = 0;
                     this.tiempoEnElQuEmpezoAEnviar = Program.current_time;
-                    this.porenviar.Dequeue();                    
+                    this.porenviar.Dequeue();
                 }
             }
         }
 
         public void EnviarElBitQueHayEnLaSalidaALasDemasComputadoras()
         {
-            
-
             Queue<Dispositivo> queue = new Queue<Dispositivo>();
             bool[] mask = new bool[Program.dispositivos.Count];
             mask[this.indice]= true; 
@@ -90,27 +97,55 @@ namespace ProyecotdeRedes
             {
                 current = queue.Dequeue();
 
-                foreach (var item in current.DispositivosConectados)
+                foreach (var item in current.PuertosConectados)
                 {
-                    if(mask[item.Indice]) continue;
+                    Dispositivo dispconectado = item.DispositivoConectado;
+                    if (mask[dispconectado.Indice]) continue;
+
+                    //int puertoporelqueestaconectado = item.PuertoPorElQueEstaConectado(current);
 
 
-                    int puertoporelqueestaconectado = item.PuertoPorElQueEstaConectado(current);
+                    //-------------------------------esto es para hacer una prueba -----------------------------------------
+                    int puertoporelqueestaconectado = item.NumeroPuertoAlQueEstaConectado;
+                    //------------------------------------------------------------------------------------------------------
 
-                    if (puertoporelqueestaconectado != -1)
-                        item.recibirUnBit(puertoporelqueestaconectado, this.bitsalida);
+                    //if (puertoporelqueestaconectado != -1)
+                    //    item.recibirUnBit(puertoporelqueestaconectado, this.bitsalida);
 
-                    //if(item is Computadora)
-                    //{
-                    //    Computadora comp = item as Computadora;
-
-                    //    comp.recibirUnBit(0,this.bitsalida); 
-                    //}
-
-                    mask[item.Indice] = true;
-                    queue.Enqueue(item); 
+                    dispconectado.recibirUnBit(puertoporelqueestaconectado, this.bitsalida); 
+                    
+                    mask[dispconectado.Indice] = true;
+                    queue.Enqueue(dispconectado); 
                 }
             }
         }
+
+        public override void ProcesarInformacionDeSalidaYDeEntrada()
+        {
+            bool hubocolision = HuboUnaColision();
+
+            
+            if (this.BitdeSalida != Bit.none && hubocolision)
+            {
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.Name, (int)this.BitdeSalida));
+                Actualizar();
+                base.LimpiarLosParametrosDeEntrada(); 
+                return; 
+            }
+            else if (this.BitdeSalida != Bit.none)
+            {
+                EscribirEnLaSalida(string.Format("{0} {1} send {2} OK", Program.current_time, this.Name, (int)this.BitdeSalida));
+            }
+            
+            if (this.BitdeEntrada != Bit.none)
+            {
+                EscribirEnLaSalida(string.Format("{0} {1} receive {2} OK", Program.current_time, this.Name, (int)this.BitdeEntrada));
+            }
+
+            base.LimpiarLosParametrosDeEntrada();
+        }
+
+
+        
     }
 }

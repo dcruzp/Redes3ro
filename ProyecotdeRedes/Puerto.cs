@@ -6,13 +6,54 @@ namespace ProyecotdeRedes
 {
     class Puerto
     {
-        Dispositivo _dispositivoConectado;
-        Bit bitdesalida; 
+        string id_puerto;        
+        int numero_puerto;
+        string puertoalqueestaconectado;
 
-        public Puerto ()
-        {            
-            this.bitdesalida = Bit.none; 
+        Dispositivo _dispositivoConectado;
+        Bit bitdesalida;
+
+        bool[] entradas;
+
+        bool estaConectado;
+
+        public string PuertoAlQueEstaConnectado
+        {
+            get => this.puertoalqueestaconectado;
+            set => this.puertoalqueestaconectado = value;
         }
+
+        public int NumeroPuertoAlQueEstaConectado
+        {
+            get =>  int.Parse(this.puertoalqueestaconectado.Split('_')[1]);
+        } 
+
+
+        public Puerto (string id_puerto , int numero_puerto)
+        {
+            this.id_puerto = id_puerto;
+            this.bitdesalida = Bit.none;
+            this.numero_puerto = numero_puerto;
+
+            entradas = new bool[Enum.GetNames(typeof(Bit)).Length];
+        }
+
+
+        public bool EstaConectadoAOtroDispositivo
+        {
+            get => this.estaConectado;
+            set => this.estaConectado = value; 
+        }
+        public string ID_Puerto
+        {
+            get => this.id_puerto;
+        }
+
+        public int Numero_Puerto
+        {
+            get => this.numero_puerto; 
+        }
+
 
         public Bit BitdeSalida
         {

@@ -8,14 +8,15 @@ namespace ProyecotdeRedes
     class Dispositivo
     {
 
-        Dispositivo[] dispositivosConectados; 
+        protected Dispositivo[] dispositivosConectados;
+
+        protected Puerto[] puertos; 
 
         protected string name;
-
-        bool[,] entradas; 
+        protected bool[,] entradas; 
 
         protected Bit bitsalida;
-        Bit bitentrada;
+        protected Bit bitentrada;
 
         protected int indice;
         protected int cantidaddepuertos; 
@@ -29,6 +30,13 @@ namespace ProyecotdeRedes
             this.indice = indice;
             this.cantidaddepuertos = cantidaddepuertos; 
             this.entradas = new bool[this.cantidaddepuertos, Enum.GetNames(typeof(Bit)).Length];
+
+            this.puertos = new Puerto[cantidaddepuertos];
+
+            for (int i = 0; i < cantidaddepuertos; i++)
+            {
+                this.puertos[i] = new Puerto(this.name + $"_{i}" , i); 
+            }
         }
 
 
@@ -66,19 +74,38 @@ namespace ProyecotdeRedes
             set => this.name = value; 
         }
 
-        public IEnumerable<Dispositivo> DispositivosConectados
+        public Puerto DameElPuerto(int id)
         {
-            get => this.dispositivosConectados; 
+            if (id >= this.cantidaddepuertos || id < 0) throw new IndexOutOfRangeException("El dispositivo no tiene el puerto que se le especifica");
+
+            return this.puertos[id]; 
         }
 
-       
+        public IEnumerable<Puerto> PuertosConectados
+        {
+            get
+            {
+                foreach (var item in this.puertos)
+                    if (item.EstaConectadoAOtroDispositivo)
+                        yield return item;
+            }
+        }
+
+        public IEnumerable<Dispositivo> DispositivosConectados
+        {
+            get
+            {
+                foreach (var item in this.puertos)                
+                    if (item.DispositivoConectado != null) 
+                        yield return item.DispositivoConectado;
+            }
+        }
 
         public void EscribirEnLaSalida(string recibo)
         {
-
             string rutaCompleta = Path.Join(DirectorioDeSalida(),this.name + ".txt");
 
-            //se crea el archivo si no existe y lo abre y ya existe 
+            //se crea el archivo si no existe y lo abre si ya existe 
             using (StreamWriter mylogs = File.AppendText(rutaCompleta))      
             {
                 mylogs.WriteLine(recibo);
@@ -95,11 +122,11 @@ namespace ProyecotdeRedes
             return Path.Join(parent.FullName, "output");
         }
 
-        public int PuertoPorElQueEstaConectado (Dispositivo disp)
+        public int PuertoPorElQueEstaConectado(Dispositivo disp)
         {
             for (int i = 0; i < this.dispositivosConectados.Length; i++)
             {
-                if (dispositivosConectados[i].Equals(disp)) return i; 
+                if (disp.Equals(dispositivosConectados[i])) return i; 
             }
             return -1; 
         }
@@ -109,5 +136,80 @@ namespace ProyecotdeRedes
         {
             this.entradas[puerto, (int)bit] = true;
         }
+
+        public bool HuboUnaColision()
+        {
+            this.bitentrada = Bit.none;
+
+            bool cero = false , uno = false; 
+            
+            for (int i = 0; i < this.cantidaddepuertos; i++)
+            {
+                if (entradas[i,(int)Bit.uno]) uno =true ;
+                if (entradas[i, (int)Bit.cero]) cero = true; 
+            }
+            if (uno && cero) return true;
+            else if (uno) this.bitentrada = Bit.uno;
+            else if (cero) this.bitentrada = Bit.cero;
+
+            if (this is Computadora && bitentrada!= Bit.none && bitentrada != bitsalida) return true; 
+            else return false; 
+        }
+
+        public virtual void ProcesarInformacionDeSalidaYDeEntrada()
+        {
+            bool hubocolision = HuboUnaColision();
+
+            if (hubocolision) return;
+
+            if (this.bitentrada == Bit.none) return; 
+
+            for (int i = 0; i < this.cantidaddepuertos; i++)
+            {
+                if (this.entradas[i, (int)Bit.cero]) EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)Bit.cero));
+                else if (this.entradas[i, (int)Bit.uno]) EscribirEnLaSalida(string.Format("{0} {1} receive {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)Bit.uno));
+                else EscribirEnLaSalida(string.Format("{0} {1} send {2} ", Program.current_time, this.Name + $"_{i + 1}", (int)this.BitdeEntrada));
+            }
+
+            LimpiarLosParametrosDeEntrada();
+        }
+
+        protected void LimpiarLosParametrosDeEntrada()
+        {
+            for (int i = 0; i < this.entradas.GetLength(0); i++)
+            {
+                for (int j = 0; j < this.entradas.GetLength(1); j++)
+                {
+                    this.entradas[i, j] = false; 
+                }
+            }
+            this.BitdeEntrada = Bit.none; 
+        }
+
+        public override string ToString()
+        {
+            StringBuilder stringBuilder = new StringBuilder();
+
+            stringBuilder.Append($"{this.name} \n");
+
+            stringBuilder.Append($"Bit de Salida:\t {(int)this.BitdeSalida}\n");
+
+            stringBuilder.Append($"Bit de Entradas:\n"); 
+            for (int i = 0; i < this.entradas.GetLength(0); i++)
+            {
+                for (int j = 0; j < this.entradas.GetLength(1); j++)
+                {
+
+                    stringBuilder.Append($"{ (this.entradas[i, j] == true ?"T" : "F")}  ");
+                }
+                stringBuilder.Append(Environment.NewLine);
+            }
+
+
+            stringBuilder.Append(Environment.NewLine);
+
+            return stringBuilder.ToString();
+        }
+
     }
 }
