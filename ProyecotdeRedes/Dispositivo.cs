@@ -7,9 +7,6 @@ namespace ProyecotdeRedes
 {
     class Dispositivo
     {
-
-        //protected Dispositivo[] dispositivosConectados;
-
         protected Puerto[] puertos; 
 
         protected string name;       
@@ -45,7 +42,7 @@ namespace ProyecotdeRedes
         public Bit BitdeSalida
         {
             get => this.bitsalida;
-            //set => this.bitsalida = value;
+           
         }
 
         public Bit BitdeEntrada
@@ -58,12 +55,6 @@ namespace ProyecotdeRedes
         {
             get => this.cantidaddepuertos; 
         }
-
-        //public Dispositivo this [int i]
-        //{
-        //    get => this.dispositivosConectados[i];
-        //    set => this.dispositivosConectados[i]  = value;
-        //}
 
         public string Name
         {
@@ -88,16 +79,7 @@ namespace ProyecotdeRedes
             }
         }
 
-        //public IEnumerable<Dispositivo> DispositivosConectados
-        //{
-        //    get
-        //    {
-        //        foreach (var item in this.puertos)                
-        //            if (item.DispositivoConectado != null) 
-        //                yield return item.DispositivoConectado;
-        //    }
-        //}
-
+      
         public void EscribirEnLaSalida(string recibo)
         {
             string rutaCompleta = Path.Join(DirectorioDeSalida(),this.name + ".txt");
@@ -111,7 +93,6 @@ namespace ProyecotdeRedes
             }
         }
 
-
         string DirectorioDeSalida()
         {
             var CurrentDirectory = Environment.CurrentDirectory;
@@ -121,8 +102,7 @@ namespace ProyecotdeRedes
 
 
         public void recibirUnBit (int puerto, Bit bit)
-        {
-            //this.entradas[puerto, (int)bit] = true;
+        {            
             this.puertos[puerto].RecibirUnBit(bit); 
         }
 
@@ -137,11 +117,6 @@ namespace ProyecotdeRedes
                 if (item.Entradas[(int)Bit.uno]) uno = true; 
             }
 
-            //for (int i = 0; i < this.cantidaddepuertos; i++)
-            //{
-            //    if (entradas[i,(int)Bit.uno]) uno =true ;
-            //    if (entradas[i, (int)Bit.cero]) cero = true; 
-            //}
 
             if (uno && cero) return true;
             else if (uno) this.bitentrada = Bit.uno;
@@ -171,7 +146,7 @@ namespace ProyecotdeRedes
 
             for (int i = 0; i < this.cantidaddepuertos; i++)
             {
-                if (this.puertos[i] == null) continue; 
+                if (this.puertos[i] == null || !this.puertos[i].EstaConectadoAOtroDispositivo) continue; 
 
                 if (this.puertos[i].Entradas[(int)Bit.cero] || this.puertos[i].Entradas[(int)Bit.uno])
                 {
@@ -179,9 +154,12 @@ namespace ProyecotdeRedes
                 }
                 else
                 {
-                    salida.Append(string.Format("{0} {1} send {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.BitdeEntrada)); 
+                    salida.Append(string.Format("{0} {1} send {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.bitentrada)); 
                 }
             }
+
+            while (salida.Length>1 && salida[salida.Length - 1] == '\n')
+                salida.Remove(salida.Length - 1, 1);
 
             EscribirEnLaSalida(salida.ToString()); 
             

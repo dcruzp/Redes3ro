@@ -6,11 +6,29 @@ namespace ProyecotdeRedes
 {
     class Computadora:Dispositivo
     {
+        /// <summary>
+        /// Esto es una cola para almacenar los bits que quedan 
+        /// por enviar aun. Si la cola esta vacía es que no quedan 
+        /// bit por enviar. 
+        /// </summary>
         Queue<Bit> porenviar;
         
+
+        /// <summary>
+        /// Este es el tiempo que el bit que esta enviándose 
+        /// ha estado transmitiéndose a las demás computadoras. 
+        /// </summary>
         uint tiempoEnviando;
+
+
         uint tiempoEnElQuEmpezoAEnviar;
 
+
+        /// <summary>
+        /// esto es para determinar el tiempo que ha estado la
+        /// computadora sin enviar información producto de una 
+        /// colisión que detecto anteriormente
+        /// </summary>
         uint tiempoesperandoparavolveraenviar; 
 
         public Computadora(string name ,int indice) : base(name ,1, indice)
@@ -20,6 +38,12 @@ namespace ProyecotdeRedes
             this.porenviar = new Queue<Bit>();
         }
 
+
+        /// <summary>
+        /// Este método se llama cuando se detecta una colisión 
+        /// Esto es para darle un tiempo random a la computadora 
+        /// para que espere anted de volver a enviar un bit
+        /// </summary>
         public void Actualizar()
         {
             this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(5,50);
@@ -28,7 +52,11 @@ namespace ProyecotdeRedes
         }
         
        
-
+        /// <summary>
+        /// Este método se llama cuando hubo una instrucción 
+        /// send para el envío de un paquete de bits
+        /// </summary>
+        /// <param name="paquete"></param>
         public void send(Bit [] paquete)
         {
             foreach (var item in paquete)
@@ -37,16 +65,18 @@ namespace ProyecotdeRedes
             }
         }
 
-        public bool NoEstaConectada()
-        {
-            // return this[0] == null;
-            return this.PuertosConectados == null; 
-        }
 
+        /// <summary>
+        /// Este método se llama inicialmente antes de cualquier otro 
+        /// llamado en un mili segundo , y lo que hace básicamente es determinar 
+        /// que bit se va a enviar y Enviárselo a las demás computadoras que 
+        /// están conectadas en la red que se encuentra la de esta instancia
+        /// </summary>
+        /// <returns></returns>
         public bool EnviarInformacionALasDemasComputadoras()
         {
-            //if (this.dispositivosConectados[0] == null)
-            //    return false; 
+            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
+                return false; 
             
             ActualizarElBitDeSalida();
             EnviarElBitQueHayEnLaSalidaALasDemasComputadoras();
@@ -56,7 +86,8 @@ namespace ProyecotdeRedes
 
         public void ActualizarElBitDeSalida()
         {
-            //if (this[0] == null) return;
+            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo) 
+                return;
 
             if (this.porenviar.Count == 0)
             {
@@ -115,6 +146,9 @@ namespace ProyecotdeRedes
 
         public override void ProcesarInformacionDeSalidaYDeEntrada()
         {
+            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
+                return;
+
             bool hubocolision = HuboUnaColision();
 
             
@@ -137,8 +171,5 @@ namespace ProyecotdeRedes
 
             base.LimpiarLosParametrosDeEntrada();
         }
-
-
-        
     }
 }

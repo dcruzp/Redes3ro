@@ -8,6 +8,7 @@ namespace ProyecotdeRedes
     {
         string id_puerto;        
         int numero_puerto;
+
         string puertoalqueestaconectado;
 
         Dispositivo _dispositivoConectado;
@@ -27,6 +28,16 @@ namespace ProyecotdeRedes
         {
             get =>  (int.Parse(this.puertoalqueestaconectado.Split('_')[1]) -1);
         } 
+
+        public void DesconectarElPuerto()
+        {
+            this.puertoalqueestaconectado = null;
+            this._dispositivoConectado = null;
+            this.bitdesalida = Bit.none;
+            this.estaConectado = false;
+
+            LimpiarEntradas(); 
+        }
 
 
         public Puerto (string id_puerto , int numero_puerto)

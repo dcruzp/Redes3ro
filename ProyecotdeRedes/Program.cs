@@ -56,8 +56,6 @@ namespace ProyecotdeRedes
         static void Main(string[] args)
         {
             CorrerlaAplicacion(); 
-
-            //EscribirlaInformacionenConsola(); 
         }
 
         public static void CorrerlaAplicacion ()
@@ -109,7 +107,9 @@ namespace ProyecotdeRedes
                     comp.EnviarInformacionALasDemasComputadoras(); 
                 }
 
-                
+                //verifica las entrada por cada dispositivo y chequea su hubo 
+                //una colisión, y escribe en la salida (en su txt correspondiente )
+                //la salida que este dispositivo tiene. 
                 foreach (var item in dispositivos)
                 {
                     item.ProcesarInformacionDeSalidaYDeEntrada();
@@ -243,8 +243,7 @@ namespace ProyecotdeRedes
             }
              
         }
-
-       
+               
         public static void CargarInstrucciones()
         {
             instrucciones = new Queue<Instruccion>(); 
@@ -374,8 +373,7 @@ namespace ProyecotdeRedes
                 int numeroport1 = int.Parse(port1.Split('_')[1]) - 1;
                 int numeroport2 = int.Parse(port2.Split('_')[1]) - 1;
 
-                //disp1[numeroport1] = disp2;
-                //disp2[numeroport2] = disp1;
+              
 
                 Puerto p1 = disp1.DameElPuerto(numeroport1);
                 Puerto p2 = disp2.DameElPuerto(numeroport2);
@@ -443,9 +441,15 @@ namespace ProyecotdeRedes
                 if (dispositivo2 == null)
                     throw new InvalidCastException($"El puerto {port2} al que se esta tratando de acceder no existe ");
 
-                //dispositivo1[int.Parse(port1.Split('_')[1])-1] = null;
-                //dispositivo2[int.Parse(port2.Split('_')[1])-1] = null; 
+                int numeropuerto1 = int.Parse(port1.Split('_')[1]) -1;
+                int numeropuerto2 = int.Parse(port2.Split('_')[1]) -1;
 
+                Puerto p1 = dispositivo1.DameElPuerto(numeropuerto1);
+                Puerto p2 = dispositivo2.DameElPuerto(numeropuerto2);
+
+                p1.DesconectarElPuerto();
+                p2.DesconectarElPuerto(); 
+                
             }
             
         }
@@ -475,84 +479,5 @@ namespace ProyecotdeRedes
             }
         }
        
-        //public static bool  HuboUnaColicion (Dispositivo disp )
-        //{
-        //    Queue<Dispositivo> cola = new Queue<Dispositivo>();
-        //    bool[] mask = new bool[Program.dispositivos.Count];
-        //    mask[disp.Indice] = true; 
-        //    cola.Enqueue(disp);
-
-        //    Dispositivo current;
-
-        //    while(cola.Count > 0 )
-        //    {
-        //        current = cola.Dequeue(); 
-
-        //        foreach (var item in current.DispositivosConectados)
-        //        {
-        //            if (item is null) continue; 
-
-        //            int indice = item.Indice;
-        //            if (mask[indice]) continue;
-
-        //            if (item is Computadora && item.BitdeSalida != Bit.none && item.BitdeSalida != disp.BitdeSalida)
-        //            {
-        //                return true; 
-        //            }
-
-        //            mask[indice] = true;
-
-        //            cola.Enqueue(item); 
-        //        }
-        //    }
-        //    return false; 
-        //}
-
-        //public static bool ActualizarelBitdeEntrada(Dispositivo disp)
-        //{
-        //    disp.BitdeEntrada = Bit.none;
-        //    Queue<Dispositivo> cola = new Queue<Dispositivo>();
-        //    bool[] mask = new bool[Program.dispositivos.Count];
-        //    mask[disp.Indice] = true;
-        //    cola.Enqueue(disp);
-
-        //    Dispositivo current;
-
-        //    while (cola.Count > 0)
-        //    {
-        //        current = cola.Dequeue();
-
-        //        foreach (var item in current.DispositivosConectados)
-        //        {
-        //            if (item is null) continue;
-
-        //            int indice = item.Indice;
-        //            if (mask[indice]) continue;
-
-        //            if (item is Computadora)
-        //            {
-        //                Computadora computadora = item as Computadora; 
-
-        //                if (computadora.BitdeSalida != Bit.none)
-        //                {
-        //                    if (disp.BitdeEntrada == Bit.none)
-        //                    {
-        //                        disp.BitdeEntrada = computadora.BitdeSalida;
-        //                    }
-        //                    else if (computadora.BitdeSalida != disp.BitdeEntrada)
-        //                    {
-        //                        disp.BitdeEntrada = Bit.none; 
-        //                        return false; 
-        //                    }
-        //                }
-        //            }
-
-        //            mask[indice] = true;
-
-        //            cola.Enqueue(item);
-        //        }
-        //    }
-        //    return true;
-        //}
     }
 }
