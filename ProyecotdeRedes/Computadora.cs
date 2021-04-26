@@ -84,10 +84,16 @@ namespace ProyecotdeRedes
             return true; 
         }
 
+
+        /// <summary>
+        /// Este método pone el bit de salida que le corresponde
+        /// es ese mili segundo estar en la salida . Este método se 
+        /// llama una sola vez en cada mili segundo de ejecución del 
+        /// programa
+        /// </summary>
         public void ActualizarElBitDeSalida()
         {
-            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo) 
-                return;
+            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)  return;
 
             if (this.porenviar.Count == 0)
             {
@@ -116,6 +122,14 @@ namespace ProyecotdeRedes
             }
         }
 
+
+        /// <summary>
+        /// Este método se llama después de haber llamado al método
+        ///  ActualizarElBitDeSalida() para que este pueda se enviado 
+        ///  con el procedimiento de este método a las demás computadoras 
+        ///  que están conectadas a la que representa esta instancia, 
+        ///  (aquí lo que se usa es un bfs para enviar el bit a cada computadora)
+        /// </summary>
         public void EnviarElBitQueHayEnLaSalidaALasDemasComputadoras()
         {
             Queue<Dispositivo> queue = new Queue<Dispositivo>();
@@ -144,6 +158,13 @@ namespace ProyecotdeRedes
             }
         }
 
+        /// <summary>
+        /// Este método es llamado para una vez que se establecieron las
+        /// salidas y entradas de datos a esta computadora puedan ser 
+        /// procesados estos datos y determinar si hubo una colisión 
+        /// y escribir en la salida del dispositivo los datos 
+        /// de salida  correspondiente a esta computadora.
+        /// </summary>
         public override void ProcesarInformacionDeSalidaYDeEntrada()
         {
             if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)

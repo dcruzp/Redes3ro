@@ -122,6 +122,11 @@ namespace ProyecotdeRedes
         }
 
 
+        /// <summary>
+        /// Esto es para poner la configuracion por defecto , 
+        /// que se pone de la manera que esta descrita en el 
+        /// metodo
+        /// </summary>
         public static void PonerConfiguracionPorDefecto()
         {
             Program.cantidadminimadepuertosdeunhub = 4;
@@ -130,6 +135,14 @@ namespace ProyecotdeRedes
             Program.tiempo_maximo = 1000000; 
         }
 
+
+
+        /// <summary>
+        /// esto es para leer del fichero config.txt que se 
+        /// encuentra en este mismo directorio en que esta este proyecto 
+        /// este pone todos los parametros establecido que se encuentran en
+        /// el fichero 
+        /// </summary>
         public static void Configurar()
         {
             var CurrentDirectory = Environment.CurrentDirectory;
@@ -223,6 +236,14 @@ namespace ProyecotdeRedes
             return true; 
         }
 
+
+        /// <summary>
+        /// esto borra todos los ficheros que se encuentran en el directorio 
+        /// output y se llama al principio de la ejecución del programa , antes de 
+        /// entrar en el ciclo principal , y se hace para barrar todos los fichero que 
+        /// se podían haber generado previamente en la ejecución de programa en un momento 
+        /// anterior
+        /// </summary>
         public  static void LimpiarDirectoriodeSalida()
         {
             var CurrentDirectory = Environment.CurrentDirectory;
@@ -244,6 +265,11 @@ namespace ProyecotdeRedes
              
         }
                
+        /// <summary>
+        /// Esto es para cargar las instrucciones del fichero script.txt que 
+        /// se encuentra en el diretorio input/ en el directorio donde se encuentra
+        /// esta solucion . 
+        /// </summary>
         public static void CargarInstrucciones()
         {
             instrucciones = new Queue<Instruccion>(); 
@@ -266,6 +292,13 @@ namespace ProyecotdeRedes
             }
         }
 
+
+        /// <summary>
+        /// Este método ejecuta una instrucción en especifico y chequea 
+        /// que tenga la sintaxis correcta , ante cualquier error esta da una excepción 
+        /// identificando que pudo haber sucedido
+        /// </summary>
+        /// <param name="instruccion"></param>
         public static void EjecutarInstruccion(Instruccion instruccion)
         {
             string _instruccion = instruccion.instruccion;
@@ -471,6 +504,13 @@ namespace ProyecotdeRedes
             return true; 
         }
 
+
+        /// <summary>
+        /// Este enumerable devuelve todas las instrucciones que se va a ejecutar en 
+        /// un tiempo determinado 
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
         private static IEnumerable<Instruccion> ProximasInstruccionesEjecutar (uint time)
         {
             while(Program.instrucciones.Count > 0 && Program.instrucciones.Peek().Time <= time)
