@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace ProyecotdeRedes
 {
@@ -21,6 +22,14 @@ namespace ProyecotdeRedes
         uint tiempoEnviando;
 
 
+        /// <summary>
+        /// Esta es la direccion Max representada en hexadecimal 
+        /// </summary>
+        string direccionMax; 
+
+
+
+
         uint tiempoEnElQuEmpezoAEnviar;
 
 
@@ -38,6 +47,35 @@ namespace ProyecotdeRedes
             this.porenviar = new Queue<Bit>();
         }
 
+
+
+        public void PonerDireccionMac (string dirMac)
+        {
+            this.direccionMax = dirMac; 
+        }
+
+
+        void CheckDirMac (string dirMac)
+        {
+            if(dirMac.Length != 4 )
+            {
+                throw new InvalidCastException($"La direccion mac {dirMac} a ponerle a la computadora {this.name} no tiene el formato correcto"); 
+            }
+            Chequearquelacadenaeshexadecimal(dirMac); 
+        }
+
+        void Chequearquelacadenaeshexadecimal (string cadena )
+        {
+            char[] caracteresvalidos = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+            foreach (var item in cadena)
+            {
+                if(!caracteresvalidos.Contains(item))
+                {
+                    throw new InvalidCastException($"La cadena '{cadena}'  no tiene el formato correcto");  
+                }
+            }
+        }
 
         /// <summary>
         /// Este método se llama cuando se detecta una colisión 
