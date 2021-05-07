@@ -9,6 +9,7 @@ namespace ProyecotdeRedes
         create = 0,
         connect = 1, 
         send = 2, 
-        disconnect=3
+        disconnect=3,
+        mac = 4 
     }
 }

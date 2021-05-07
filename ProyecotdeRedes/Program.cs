@@ -334,6 +334,9 @@ namespace ProyecotdeRedes
                 case "disconnect":
                     tipoinstruccion = TipodeInstruccion.disconnect;
                     break;
+                case "mac":
+                    tipoinstruccion = TipodeInstruccion.mac;
+                    break; 
                 default:
                     throw new InvalidCastException($" '{instruccionpartida[1]}' no ese un tipo de instrucción valida");
             }
@@ -430,7 +433,7 @@ namespace ProyecotdeRedes
                 string host = instruccionpartida[2];
                 string data = instruccionpartida[3];
 
-                if (!Esbinarioelstring(data))
+                if (!CkeckMetods.esBinariaLaCadena(data))
                 {
                     throw new InvalidCastException($"La información '{data}' que se quiere enviar no tiene un formato correcto ");
                 }
@@ -485,23 +488,38 @@ namespace ProyecotdeRedes
                 
             }
             
+            else if (tipoinstruccion  ==  TipodeInstruccion.mac)
+            {
+                if (instruccionpartida.Length < 4 )
+                {
+                    throw new InvalidCastException($"La instruccion mac '{_instruccion}' no tiene un formato valido"); 
+                }
+
+                Dispositivo disp = dispositivos.Where(x => x.Name == instruccionpartida[2]).FirstOrDefault();
+
+                Computadora comp = null;
+
+                if (disp is Computadora) comp = disp as Computadora;
+                
+                if (comp is null)
+                {
+                    throw new NullReferenceException($"No se puede encontrar el Host '{instruccionpartida[2]}' en los dispositivos actuales"); 
+                }
+
+                string dirMac = instruccionpartida[3]; 
+
+                if (!CkeckMetods.CheckIsOkDirMac(dirMac))
+                {
+                    throw new InvalidCastException($"La instruccion Mac '{dirMac}' no tiene la sintaxis correcta "); 
+                }
+
+                comp.PonerDireccionMac(dirMac); 
+            }
         }
 
         static void LanzarExepciondeCasteo(Instruccion instruccion)
         {
             throw new InvalidCastException($"La instrucción '{instruccion.instruccion}' no tiene un formato válido ");
-        }
-
-        static bool Esbinarioelstring (string numero)
-        {
-            foreach (var item in numero)
-            {
-                if(item != '0' && item != '1')
-                {
-                    return false; 
-                }
-            }
-            return true; 
         }
 
 

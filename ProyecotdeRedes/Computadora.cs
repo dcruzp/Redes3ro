@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Linq;
 
 namespace ProyecotdeRedes
 {
@@ -25,9 +23,14 @@ namespace ProyecotdeRedes
         /// <summary>
         /// Esta es la direccion Max representada en hexadecimal 
         /// </summary>
-        string direccionMax; 
+        string direccionMax;
 
 
+
+        /// <summary>
+        /// Datos que se han recibido 
+        /// </summary>
+        Queue<Bit> _recibidos; 
 
 
         uint tiempoEnElQuEmpezoAEnviar;
@@ -45,35 +48,21 @@ namespace ProyecotdeRedes
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
             this.porenviar = new Queue<Bit>();
+            this.direccionMax = null; 
+            
         }
 
 
 
         public void PonerDireccionMac (string dirMac)
         {
-            this.direccionMax = dirMac; 
-        }
-
-
-        void CheckDirMac (string dirMac)
-        {
-            if(dirMac.Length != 4 )
+            if (direccionMax == null && CkeckMetods.CheckIsOkDirMac(dirMac))
             {
-                throw new InvalidCastException($"La direccion mac {dirMac} a ponerle a la computadora {this.name} no tiene el formato correcto"); 
+                this.direccionMax = dirMac;
             }
-            Chequearquelacadenaeshexadecimal(dirMac); 
-        }
-
-        void Chequearquelacadenaeshexadecimal (string cadena )
-        {
-            char[] caracteresvalidos = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
-
-            foreach (var item in cadena)
+            else
             {
-                if(!caracteresvalidos.Contains(item))
-                {
-                    throw new InvalidCastException($"La cadena '{cadena}'  no tiene el formato correcto");  
-                }
+                throw new InvalidCastException($"No se pudo asignar la direccion Mac {dirMac} a la computadora {this.name}"); 
             }
         }
 
