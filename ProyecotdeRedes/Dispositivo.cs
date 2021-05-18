@@ -220,8 +220,9 @@ namespace ProyecotdeRedes
             else if (uno) this.bitentrada = Bit.uno;
             else if (cero) this.bitentrada = Bit.cero;
 
-            if (this is Computadora && bitentrada!= Bit.none && bitentrada != bitsalida) return true; 
-            else return false; 
+            //if (this is Computadora && bitentrada!= Bit.none /*&&  bitentrada != bitsalida*/) return true; 
+            //else return false; 
+            return false; 
         }
 
 

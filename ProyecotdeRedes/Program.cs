@@ -58,16 +58,21 @@ namespace ProyecotdeRedes
             RunAplication();
 
 
-            //foreach (var item in Program.dispositivos.Where(x => x is Computadora))
-            //{
-            //    Computadora comp = item as Computadora;
+            foreach (var item in Program.dispositivos.Where(x => x is Computadora))
+            {
+                Computadora comp = item as Computadora;
 
-            //    if (comp is null) continue;
+                if (comp is null) continue;
 
-            //    comp.PrintReceivedBits(); 
-            //}
+                comp.PrintReceivedBits();
+            }
         }
 
+
+        public void ConfigureAplication()
+        {
+
+        }
 
         public static void RunAplication()
         {
@@ -243,6 +248,27 @@ namespace ProyecotdeRedes
 
                     Computadora computadora = new Computadora(name ,Program.dispositivos.Count);
                     Program.dispositivos.Add(computadora); 
+                }
+
+                else if (instruccionpartida[2] =="switch")
+                {
+                    if (instruccionpartida.Length < 5)
+                    {
+                        EnviromentActions.LanzarExepciondeCasteo(instruccion);
+                    }
+
+                    if (!UInt32.TryParse(instruccionpartida[4], out cantidaddepuertos))
+                    {
+                        throw new FormatException($"La cantidad de puertos '{instruccionpartida[4]}' de la instrucción no tiene un formato válido");
+                    }
+
+                    if (cantidaddepuertos < Program.cantidadminimadepuertosdeunhub || cantidaddepuertos > Program.cantidadmaximadepuertosdeunhub)
+                    {
+                        throw new IndexOutOfRangeException("la cantidad de puertos para un hub no son validos");
+                    }
+
+                    Switch _switch = new Switch(name, (int)cantidaddepuertos, Program.dispositivos.Count);
+                    Program.dispositivos.Add(_switch);
                 }
             }
 
