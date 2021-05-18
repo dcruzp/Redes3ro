@@ -5,7 +5,7 @@ using System.Text;
 namespace ProyecotdeRedes
 {
      
-    class Instruccion
+    public class Instruccion
     {
         /// <summary>
         /// El tiempo en el que le toca ejecutarse la instrucion 

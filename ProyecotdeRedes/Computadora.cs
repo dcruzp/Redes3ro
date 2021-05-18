@@ -35,6 +35,9 @@ namespace ProyecotdeRedes
 
         uint tiempoEnElQuEmpezoAEnviar;
 
+        Bit bitReceived;
+
+        uint timeReceivedTheInputBit; 
 
         /// <summary>
         /// esto es para determinar el tiempo que ha estado la
@@ -48,15 +51,21 @@ namespace ProyecotdeRedes
             this.tiempoEnviando = 0;
             this.tiempoEnElQuEmpezoAEnviar = 0;
             this.porenviar = new Queue<Bit>();
-            this.direccionMax = null; 
-            
+            this.direccionMax = null;
+            this._recibidos = new Queue<Bit>();
+            this.bitReceived = Bit.none;
+            this.timeReceivedTheInputBit = 0; 
         }
 
 
-
-        public void PonerDireccionMac (string dirMac)
+        /// <summary>
+        /// Esto es para darle una direccion Mac a la computadora 
+        /// El paramentro es un string hexadecimal de 4 digitos
+        /// </summary>
+        /// <param name="dirMac"></param>
+        public void PutMacDirection (string dirMac)
         {
-            if (direccionMax == null && CkeckMetods.CheckIsOkDirMac(dirMac))
+            if (direccionMax == null && CheckMetods.CheckIsOkDirMac(dirMac))
             {
                 this.direccionMax = dirMac;
             }
@@ -78,6 +87,40 @@ namespace ProyecotdeRedes
             this.tiempoEnviando = 0;
         }
         
+
+
+
+        public void updateDataReceived ()
+        {
+            if (this.bitentrada == Bit.none)
+            {
+                this.bitReceived = Bit.none;
+                this.timeReceivedTheInputBit = 0;
+                return; 
+            }
+
+            if (this.bitReceived == Bit.none) 
+                this.bitReceived = this.bitentrada;
+
+            if (this.bitReceived == this.bitentrada)
+            {
+                this.timeReceivedTheInputBit++;
+            }
+            else
+            {
+                this.bitReceived = this.bitentrada;
+                this.timeReceivedTheInputBit = 0; 
+            }
+            
+            if (this.timeReceivedTheInputBit == Program.signal_time)
+            {
+                this._recibidos.Enqueue(this.bitentrada);
+                this.timeReceivedTheInputBit = 0;
+                this.bitReceived = Bit.none; 
+            }
+        }
+
+
        
         /// <summary>
         /// Este método se llama cuando hubo una instrucción 
@@ -204,7 +247,6 @@ namespace ProyecotdeRedes
             {
                 EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.Name, (int)this.BitdeSalida));
                 Actualizar();
-                base.LimpiarLosParametrosDeEntrada(); 
                 return; 
             }
             else if (this.BitdeSalida != Bit.none)
@@ -217,7 +259,17 @@ namespace ProyecotdeRedes
                 EscribirEnLaSalida(string.Format("{0} {1} receive {2} Ok", Program.current_time, this.Name, (int)this.BitdeEntrada));
             }
 
-            base.LimpiarLosParametrosDeEntrada();
+        }
+
+
+        public void PrintReceivedBits ()
+        {
+            Console.Write($"{this.name} ");
+            foreach (var item in _recibidos)
+            {
+                Console.Write((int)item + " " );
+            }
+            Console.WriteLine();
         }
     }
 }

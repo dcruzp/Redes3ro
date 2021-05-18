@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ProyecotdeRedes
 {
-    public class CkeckMetods
+    public class CheckMetods
     {
 
         public static Boolean CheckIsOkDirMac (string dirMac)
@@ -34,7 +34,19 @@ namespace ProyecotdeRedes
             return true;
         }
 
-    }
 
-    
+        public static bool sonvalidoslacantidaddepuertosdeunhub(int a, int b)
+        {
+            if (a < 4)
+            {
+                throw new InvalidCastException("Un hub no puede tener menos de 4 puertos ");
+            }
+            if (b <= a)
+            {
+                throw new InvalidCastException("La cantidad máxima de puertos no puede ser menor o igual que la cantidad mínima de puertos");
+            }
+            return true;
+        }
+
+    }
 }

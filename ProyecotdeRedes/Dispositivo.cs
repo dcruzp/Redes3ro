@@ -233,17 +233,8 @@ namespace ProyecotdeRedes
         {
             bool hubocolision = HuboUnaColision();
 
-            if (hubocolision)
-            {
-                LimpiarLosParametrosDeEntrada();
-                return;
-            }
-
-            if (this.bitentrada == Bit.none)
-            {
-                LimpiarLosParametrosDeEntrada(); 
-                return;
-            }
+            if (hubocolision || this.bitentrada == Bit.none)  return;
+            
 
             StringBuilder salida = new StringBuilder(); 
 
@@ -265,9 +256,7 @@ namespace ProyecotdeRedes
                 salida.Remove(salida.Length - 1, 1);
 
             EscribirEnLaSalida(salida.ToString()); 
-            
-
-            LimpiarLosParametrosDeEntrada();
+           
         }
 
 
@@ -275,7 +264,7 @@ namespace ProyecotdeRedes
         /// esto limpia el array de bit recibido por las computadoras en un 
         /// mili segundo determinado 
         /// </summary>
-        protected void LimpiarLosParametrosDeEntrada()
+        public void LimpiarLosParametrosDeEntrada()
         {
 
             foreach (var item in this.PuertosConectados)

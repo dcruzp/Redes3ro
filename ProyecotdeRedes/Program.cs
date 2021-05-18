@@ -55,10 +55,21 @@ namespace ProyecotdeRedes
         
         static void Main(string[] args)
         {
-            CorrerlaAplicacion(); 
+            RunAplication();
+
+
+            //foreach (var item in Program.dispositivos.Where(x => x is Computadora))
+            //{
+            //    Computadora comp = item as Computadora;
+
+            //    if (comp is null) continue;
+
+            //    comp.PrintReceivedBits(); 
+            //}
         }
 
-        public static void CorrerlaAplicacion ()
+
+        public static void RunAplication()
         {
             dispositivos = new List<Dispositivo>();
 
@@ -66,7 +77,7 @@ namespace ProyecotdeRedes
             //Esto limpia el directorio de la salida (es decir borra todos los ficheros que hay 
             //en el directorio '/output') para que en la ejecución no se vayan a sobre escribir 
             //sobre ficheros ya existentes 
-            LimpiarDirectoriodeSalida();
+            EnviromentActions.LimpiarDirectoriodeSalida();
 
 
 
@@ -74,13 +85,13 @@ namespace ProyecotdeRedes
             //para almacenarlos en memoria , todas las instrucciones que hay en el fichero quedan 
             //almacenadas en instrucciones , ordenadas por el tiempo de ejecución de la instrucción 
             //de forma ascendente, para que una vez hallan sido ejecutadas salgan de la cola.  
-            CargarInstrucciones();
+            EnviromentActions.CargarInstrucciones();
 
 
 
             //Este métodos es para configurar todo el entorno del programa ,como signal_time , cantidad
             //máxima de mili-segundos que debe correr el programa , etc 
-            Configurar();
+            EnviromentActions.Configurar();
 
 
             //Este es el ciclo principal para correr las instrucciones y hacer el envió de 
@@ -113,6 +124,19 @@ namespace ProyecotdeRedes
                 foreach (var item in dispositivos)
                 {
                     item.ProcesarInformacionDeSalidaYDeEntrada();
+                    
+                    //----------------esto es un prueba -----------------------
+
+                    Computadora comp =  item as Computadora; 
+                    if(comp != null)
+                    {
+                        comp.updateDataReceived();
+                    }
+
+                    //--------------------------------------------------------
+
+                    item.LimpiarLosParametrosDeEntrada();
+
                 }
 
                 //Aumentar el contador de mili-segundos para pasar a procesar 
@@ -122,176 +146,18 @@ namespace ProyecotdeRedes
         }
 
 
-        /// <summary>
-        /// Esto es para poner la configuracion por defecto , 
-        /// que se pone de la manera que esta descrita en el 
-        /// metodo
-        /// </summary>
-        public static void PonerConfiguracionPorDefecto()
-        {
-            Program.cantidadminimadepuertosdeunhub = 4;
-            Program.cantidadminimadepuertosdeunhub = 8;
-            Program.signal_time = 10;
-            Program.tiempo_maximo = 1000000; 
-        }
+        
 
 
 
-        /// <summary>
-        /// esto es para leer del fichero config.txt que se 
-        /// encuentra en este mismo directorio en que esta este proyecto 
-        /// este pone todos los parametros establecido que se encuentran en
-        /// el fichero 
-        /// </summary>
-        public static void Configurar()
-        {
-            var CurrentDirectory = Environment.CurrentDirectory;
-            var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
+        
 
-            string rutaCompleta = Path.Join(parent.FullName, "config.txt");
-
-            if (! File.Exists(rutaCompleta))
-            {
-                PonerConfiguracionPorDefecto();
-                Console.WriteLine($"Advertencia: El fichero 'config.txt' no existe\n las configuraciones que se van a poner son las que hay por defecto");
-                return;                
-            }
-
-            var variable = File.ReadLines(rutaCompleta);
+        
 
 
-            foreach (var item in variable)
-            {
-                if (item.Length < 1) continue; 
-
-                string[] configuracionpartida = item.Split(':');
-              
-                if (configuracionpartida.Length < 2) throw new InvalidCastException($"la configuración {item} no tiene el formato correcto"); 
-
-                switch(configuracionpartida[0])
-                {
-                    case "max_cantidad_milisegundos":
-                        UInt32 _tiempo_maximo; 
-                        if (UInt32.TryParse(configuracionpartida[1],out _tiempo_maximo))
-                        {
-                            Program.tiempo_maximo = _tiempo_maximo; 
-                        }
-                        else
-                        {
-                            throw new InvalidCastException($"el numero para asignarle al tiempo_maximo: '{configuracionpartida[1]} no es valido '"); 
-                        }
-                        break; 
-
-                    case "signal_time":
-                        int _signal_time;
-                        if (Int32.TryParse(configuracionpartida[1], out _signal_time))
-                        {
-                            Program.signal_time = (uint)_signal_time; 
-                        }
-                        else
-                        {
-                            throw new InvalidCastException($"el numero para asignarle el _signal_time '{configuracionpartida[1]}' no tiene el formato correcto"); 
-                        }
-                        break;
-                    case "numero_puertos_hub":
-                        string[] extremosdelintervalo = configuracionpartida[1].Split('-');
-
-                        if (extremosdelintervalo.Length<2)
-                        {
-                            throw new InvalidCastException($"No tiene el formato correcto los intervalos '{extremosdelintervalo}'");
-                        }
-
-                        int min, max;
-
-                        if (! int.TryParse(extremosdelintervalo[0], out min))
-                        {
-                            throw new InvalidCastException($"El extremo {extremosdelintervalo[0]} no es un numero valido "); 
-                        }
-                        if (!int.TryParse(extremosdelintervalo[1], out max))
-                        {
-                            throw new InvalidCastException($"El extremo {extremosdelintervalo[1]} no es un numero valido ");
-                        }
-
-                        if (sonvalidoslacantidaddepuertosdeunhub(min,max))
-                        {
-                            Program.cantidadminimadepuertosdeunhub = min;
-                            Program.cantidadmaximadepuertosdeunhub = max; 
-                        }
-                        break; 
-
-                }
-            }
-        }
-
-        public static bool sonvalidoslacantidaddepuertosdeunhub(int a , int b)
-        {
-            if (a < 4 )
-            {
-                throw new InvalidCastException("Un hub no puede tener menos de 4 puertos "); 
-            }
-            if (b<=a)
-            {
-                throw new InvalidCastException("La cantidad máxima de puertos no puede ser menor o igual que la cantidad mínima de puertos");
-            }
-            return true; 
-        }
-
-
-        /// <summary>
-        /// esto borra todos los ficheros que se encuentran en el directorio 
-        /// output y se llama al principio de la ejecución del programa , antes de 
-        /// entrar en el ciclo principal , y se hace para barrar todos los fichero que 
-        /// se podían haber generado previamente en la ejecución de programa en un momento 
-        /// anterior
-        /// </summary>
-        public  static void LimpiarDirectoriodeSalida()
-        {
-            var CurrentDirectory = Environment.CurrentDirectory;
-            var parent = Directory.GetParent(Directory.GetParent(Directory.GetParent(CurrentDirectory).FullName).FullName);
-
-            var salida = Path.Join(parent.FullName, "output");
-
-            if (Directory.Exists(salida))
-            {
-                foreach (var item in Directory.GetFiles(salida))
-                {
-                    File.Delete(item); 
-                }
-            }
-            else
-            {
-                throw new Exception("La Salida no existe , para borrar el contenido dentro del directorio"); 
-            }
-             
-        }
+       
                
-        /// <summary>
-        /// Esto es para cargar las instrucciones del fichero script.txt que 
-        /// se encuentra en el diretorio input/ en el directorio donde se encuentra
-        /// esta solucion . 
-        /// </summary>
-        public static void CargarInstrucciones()
-        {
-            instrucciones = new Queue<Instruccion>(); 
-            
-            var directorio = Directory.GetParent(Directory.GetParent(Directory.GetParent(Environment.CurrentDirectory).FullName).FullName);
-
-            var directoriodelfichero = Path.Join(directorio.FullName, "input", "script.txt" );
-
-            if (File.Exists(directoriodelfichero))
-            {
-                IEnumerable<Instruccion> lines = from inst in File.ReadLines(directoriodelfichero)
-                                            orderby int.Parse(inst.Split(' ')[0]) ascending
-                                            select new Instruccion(inst);
-
-                instrucciones = new Queue<Instruccion>(lines); 
-            }
-            else
-            {
-                throw new NullReferenceException("no existe el fichero script"); 
-            }
-        }
-
+       
 
         /// <summary>
         /// Este método ejecuta una instrucción en especifico y chequea 
@@ -306,7 +172,7 @@ namespace ProyecotdeRedes
             string [] instruccionpartida = _instruccion.Split(" ");
 
             if (instruccionpartida.Length < 1)
-                LanzarExepciondeCasteo(instruccion);
+                EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
             uint tiempodelainstruccion;
 
@@ -316,7 +182,7 @@ namespace ProyecotdeRedes
             }
 
             if (instruccionpartida.Length < 2)
-                LanzarExepciondeCasteo(instruccion);
+                EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
             TipodeInstruccion tipoinstruccion ; 
 
@@ -344,7 +210,7 @@ namespace ProyecotdeRedes
             if (tipoinstruccion == TipodeInstruccion.create)
             {
                 if (instruccionpartida.Length < 4)
-                    LanzarExepciondeCasteo(instruccion);
+                    EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
                 string name = instruccionpartida[3];
 
@@ -354,7 +220,7 @@ namespace ProyecotdeRedes
                 {
                     if (instruccionpartida.Length < 5)
                     {
-                        LanzarExepciondeCasteo(instruccion);
+                        EnviromentActions.LanzarExepciondeCasteo(instruccion);
                     }
 
                     if (!UInt32.TryParse(instruccionpartida[4], out cantidaddepuertos))
@@ -383,7 +249,7 @@ namespace ProyecotdeRedes
             else if (tipoinstruccion == TipodeInstruccion.connect)
             {
                 if (instruccionpartida.Length < 4)
-                    LanzarExepciondeCasteo(instruccion);
+                    EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
                 string port1 = instruccionpartida[2];
                 string port2 = instruccionpartida[3];
@@ -428,12 +294,12 @@ namespace ProyecotdeRedes
             else if (tipoinstruccion == TipodeInstruccion.send)
             {
                 if (instruccionpartida.Length < 4)
-                    LanzarExepciondeCasteo(instruccion);
+                    EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
                 string host = instruccionpartida[2];
                 string data = instruccionpartida[3];
 
-                if (!CkeckMetods.esBinariaLaCadena(data))
+                if (!CheckMetods.esBinariaLaCadena(data))
                 {
                     throw new InvalidCastException($"La información '{data}' que se quiere enviar no tiene un formato correcto ");
                 }
@@ -463,7 +329,7 @@ namespace ProyecotdeRedes
             else if (tipoinstruccion == TipodeInstruccion.disconnect)
             {
                 if (instruccionpartida.Length < 4)
-                    LanzarExepciondeCasteo(instruccion);
+                    EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
                 string port1 = instruccionpartida[2];
                 string port2 = instruccionpartida[3]; 
@@ -508,19 +374,16 @@ namespace ProyecotdeRedes
 
                 string dirMac = instruccionpartida[3]; 
 
-                if (!CkeckMetods.CheckIsOkDirMac(dirMac))
+                if (!CheckMetods.CheckIsOkDirMac(dirMac))
                 {
                     throw new InvalidCastException($"La instruccion Mac '{dirMac}' no tiene la sintaxis correcta "); 
                 }
 
-                comp.PonerDireccionMac(dirMac); 
+                comp.PutMacDirection(dirMac); 
             }
         }
 
-        static void LanzarExepciondeCasteo(Instruccion instruccion)
-        {
-            throw new InvalidCastException($"La instrucción '{instruccion.instruccion}' no tiene un formato válido ");
-        }
+       
 
 
         /// <summary>
