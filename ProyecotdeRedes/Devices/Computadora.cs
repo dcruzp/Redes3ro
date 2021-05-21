@@ -88,7 +88,10 @@ namespace ProyecotdeRedes
         }
         
 
-
+        public void send_frame (string mac, string data)
+        {
+            throw new Exception(); 
+        }
 
         public void updateDataReceived ()
         {

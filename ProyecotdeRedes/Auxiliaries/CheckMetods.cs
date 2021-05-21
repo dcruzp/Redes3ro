@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProyecotdeRedes
+namespace ProyecotdeRedes.Auxiliaries
 {
     public class CheckMetods
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dirMac"></param>
+        /// <returns></returns>
         public static Boolean CheckIsOkDirMac (string dirMac)
         {
             return dirMac.Length == 4 && CheckStrContainOnlyHexadecimalCharacters(dirMac); 
@@ -22,6 +26,11 @@ namespace ProyecotdeRedes
             return true;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cad"></param>
+        /// <returns></returns>
         public static bool esBinariaLaCadena(string cad)
         {
             foreach (var item in cad)

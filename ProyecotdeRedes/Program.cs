@@ -3,7 +3,8 @@ using System.Reflection;
 using System.IO;
 using System.Threading;
 using System.Collections.Generic;
-using System.Linq; 
+using System.Linq;
+using ProyecotdeRedes.Auxiliaries;
 
 namespace ProyecotdeRedes
 {
@@ -152,18 +153,6 @@ namespace ProyecotdeRedes
 
 
         
-
-
-
-        
-
-        
-
-
-       
-               
-       
-
         /// <summary>
         /// Este método ejecuta una instrucción en especifico y chequea 
         /// que tenga la sintaxis correcta , ante cualquier error esta da una excepción 
@@ -189,28 +178,7 @@ namespace ProyecotdeRedes
             if (instruccionpartida.Length < 2)
                 EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
-            TipodeInstruccion tipoinstruccion ; 
-
-            switch(instruccionpartida[1])
-            {
-                case "create":
-                    tipoinstruccion = TipodeInstruccion.create;
-                    break;
-                case "connect":
-                    tipoinstruccion = TipodeInstruccion.connect;
-                    break;
-                case "send":
-                    tipoinstruccion = TipodeInstruccion.send;
-                    break;
-                case "disconnect":
-                    tipoinstruccion = TipodeInstruccion.disconnect;
-                    break;
-                case "mac":
-                    tipoinstruccion = TipodeInstruccion.mac;
-                    break; 
-                default:
-                    throw new InvalidCastException($" '{instruccionpartida[1]}' no ese un tipo de instrucción valida");
-            }
+            TipodeInstruccion tipoinstruccion = AuxiliaryFunctions.GiveMeTheInstruction(instruccionpartida[1]); 
 
             if (tipoinstruccion == TipodeInstruccion.create)
             {
@@ -406,6 +374,42 @@ namespace ProyecotdeRedes
                 }
 
                 comp.PutMacDirection(dirMac); 
+            }
+
+            else if (tipoinstruccion == TipodeInstruccion.send_frame)
+            {
+                if (instruccionpartida.Length < 5)
+                {
+                    throw new InvalidCastException($"La instruccion mac '{_instruccion}' no tiene un formato valido");
+                }
+
+
+                Dispositivo disp = dispositivos.Where(x => x.Name == instruccionpartida[2]).FirstOrDefault();
+
+                Computadora comp = null;
+
+                if (disp is Computadora) comp = disp as Computadora;
+
+                if (comp is null)
+                {
+                    throw new NullReferenceException($"No se puede encontrar el Host '{instruccionpartida[2]}' en los dispositivos actuales");
+                }
+
+                string dirMacToSend = instruccionpartida[3];
+                string dataToSend = instruccionpartida[4];
+
+                if (!CheckMetods.CheckIsOkDirMac(dirMacToSend))
+                {
+                    throw new InvalidCastException($"La instruccion send_frame '{dirMacToSend}' no tiene la sintaxis correcta ");
+                }
+
+                if (!CheckMetods.CheckStrContainOnlyHexadecimalCharacters(dataToSend))
+                {
+                    throw new InvalidCastException($"La instruccion send_frame '{dataToSend}' no contiene los datos a enviar en formato hexadecimal");
+                }
+
+                comp.send_frame(dirMacToSend, dataToSend);
+                  
             }
         }
 
