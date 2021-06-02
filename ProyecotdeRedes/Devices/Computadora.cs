@@ -1,5 +1,9 @@
-﻿using System;
+﻿using ProyecotdeRedes.Auxiliaries;
+using ProyecotdeRedes.Component;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Action = ProyecotdeRedes.Component.Action;
 
 namespace ProyecotdeRedes
 {
@@ -26,11 +30,10 @@ namespace ProyecotdeRedes
         string direccionMax;
 
 
-
         /// <summary>
         /// Datos que se han recibido 
         /// </summary>
-        Queue<Bit> _recibidos; 
+        Queue<OneBitPackage> _sendAndReceived; 
 
 
         uint tiempoEnElQuEmpezoAEnviar;
@@ -52,7 +55,7 @@ namespace ProyecotdeRedes
             this.tiempoEnElQuEmpezoAEnviar = 0;
             this.porenviar = new Queue<Bit>();
             this.direccionMax = null;
-            this._recibidos = new Queue<Bit>();
+            this._sendAndReceived = new Queue<OneBitPackage>();
             this.bitReceived = Bit.none;
             this.timeReceivedTheInputBit = 0; 
         }
@@ -87,10 +90,47 @@ namespace ProyecotdeRedes
             this.tiempoEnviando = 0;
         }
         
-
-        public void send_frame (string mac, string data)
+        public void send_frame (string mac , string data)
         {
-            throw new Exception(); 
+            var packagetosend = new List<Bit>();
+
+            var dirmaxin = string.IsNullOrEmpty(mac) ? "FFFF" : mac;
+
+            var dirmacout = string.IsNullOrEmpty(this.direccionMax) ? "FFFF" : this.direccionMax;
+
+            var lenghtdata = (data.Length / 2).ToString("X");
+
+            while (lenghtdata.Length < 2) lenghtdata = "0" + lenghtdata;
+
+            packagetosend = PackageToSend(dirmaxin, dirmacout, lenghtdata, "00", data);
+
+            foreach (var item in packagetosend)
+            {
+                this.porenviar.Enqueue(item); 
+            }
+        }
+
+
+
+
+        /// <summary>
+        /// Esto retorna dado dos string que representa las direccion mac 
+        /// y la data a enviar en formato hexadecimal y retorna una lista 
+        /// de bits donde esta representado el frame que se quiere enviar  
+        /// </summary>
+        /// <param name="mac"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private List<Bit>  PackageToSend (params string [] datainHex)
+        {
+            var package = new List<Bit>();
+
+            foreach (var item in datainHex)
+            {
+                package.AddRange(AuxiliaryFunctions.convertFromHexStrToBitArray(item));
+            }
+
+            return package; 
         }
 
         public void updateDataReceived ()
@@ -117,7 +157,12 @@ namespace ProyecotdeRedes
             
             if (this.timeReceivedTheInputBit == Program.signal_time)
             {
-                this._recibidos.Enqueue(this.bitentrada);
+                OneBitPackage bitreceived = new OneBitPackage(
+                    Program.current_time,
+                    ActionResult.Received,
+                    this.bitentrada);
+
+                this._sendAndReceived.Enqueue(bitreceived);
                 this.timeReceivedTheInputBit = 0;
                 this.bitReceived = Bit.none; 
             }
@@ -248,18 +293,23 @@ namespace ProyecotdeRedes
             
             if (this.BitdeSalida != Bit.none && hubocolision)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.Name, (int)this.BitdeSalida));
+                this._sendAndReceived.Enqueue(new OneBitPackage(
+                                                                 Program.current_time,
+                                                                 Action.Send,
+                                                                 this.BitdeSalida));
+                //EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.Name, (int)this.BitdeSalida));
                 Actualizar();
                 return; 
             }
             else if (this.BitdeSalida != Bit.none)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} send {2} Ok", Program.current_time, this.Name, (int)this.BitdeSalida));
+
+                //EscribirEnLaSalida(string.Format("{0} {1} send {2} Ok", Program.current_time, this.Name, (int)this.BitdeSalida));
             }
             
             if (this.BitdeEntrada != Bit.none)
             {
-                EscribirEnLaSalida(string.Format("{0} {1} receive {2} Ok", Program.current_time, this.Name, (int)this.BitdeEntrada));
+                //EscribirEnLaSalida(string.Format("{0} {1} receive {2} Ok", Program.current_time, this.Name, (int)this.BitdeEntrada));
             }
 
         }
@@ -267,11 +317,13 @@ namespace ProyecotdeRedes
 
         public void PrintReceivedBits ()
         {
-            Console.Write($"{this.name} ");
-            foreach (var item in _recibidos)
+            Console.Write($"\n{this.name.ToUpper()} ");
+
+            foreach (var item in _sendAndReceived)
             {
-                Console.Write((int)item + " " );
+                Console.WriteLine(item.ToString());
             }
+
             Console.WriteLine();
         }
     }

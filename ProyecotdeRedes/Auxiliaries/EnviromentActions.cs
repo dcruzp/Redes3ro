@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using ProyecotdeRedes.Auxiliaries;
 
 namespace ProyecotdeRedes
 {
@@ -137,7 +136,6 @@ namespace ProyecotdeRedes
             {
                 throw new Exception("La Salida no existe , para borrar el contenido dentro del directorio");
             }
-
         }
 
 
@@ -158,6 +156,7 @@ namespace ProyecotdeRedes
             if (File.Exists(directoriodelfichero))
             {
                 IEnumerable<Instruccion> lines = from inst in File.ReadLines(directoriodelfichero)
+                                                 where !string.IsNullOrEmpty(inst) 
                                                  orderby int.Parse(inst.Split(' ')[0]) ascending
                                                  select new Instruccion(inst);
 
@@ -170,7 +169,6 @@ namespace ProyecotdeRedes
         }
 
 
-      
 
         public static void LanzarExepciondeCasteo(Instruccion instruccion)
         {

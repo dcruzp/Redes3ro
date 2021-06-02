@@ -256,7 +256,7 @@ namespace ProyecotdeRedes
             while (salida.Length>1 && salida[salida.Length - 1] == '\n')
                 salida.Remove(salida.Length - 1, 1);
 
-            EscribirEnLaSalida(salida.ToString()); 
+            //EscribirEnLaSalida(salida.ToString()); 
            
         }
 

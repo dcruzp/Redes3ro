@@ -21,8 +21,8 @@ namespace ProyecotdeRedes.Auxiliaries
         {
             char[] caracteresvalidos = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-            foreach (var item in caracteresvalidos)
-                if (caracteresvalidos.Contains(item)) return false;
+            foreach (var item in str)
+                if (!caracteresvalidos.Contains(item)) return false;
             return true;
         }
 
