@@ -3,6 +3,7 @@ using ProyecotdeRedes.Component;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Action = ProyecotdeRedes.Component.Action;
 
 namespace ProyecotdeRedes
@@ -145,6 +146,8 @@ namespace ProyecotdeRedes
             if (this.bitReceived == Bit.none) 
                 this.bitReceived = this.bitentrada;
 
+
+
             if (this.bitReceived == this.bitentrada)
             {
                 this.timeReceivedTheInputBit++;
@@ -159,7 +162,7 @@ namespace ProyecotdeRedes
             {
                 OneBitPackage bitreceived = new OneBitPackage(
                     Program.current_time,
-                    ActionResult.Received,
+                    Action.Received,
                     this.bitentrada);
 
                 this._sendAndReceived.Enqueue(bitreceived);
@@ -303,6 +306,11 @@ namespace ProyecotdeRedes
             }
             else if (this.BitdeSalida != Bit.none)
             {
+                this._sendAndReceived.Enqueue(new OneBitPackage(
+                                                                 Program.current_time,
+                                                                 Action.Send,
+                                                                 this.BitdeSalida,
+                                                                 ActionResult.Ok));
 
                 //EscribirEnLaSalida(string.Format("{0} {1} send {2} Ok", Program.current_time, this.Name, (int)this.BitdeSalida));
             }
@@ -317,14 +325,21 @@ namespace ProyecotdeRedes
 
         public void PrintReceivedBits ()
         {
-            Console.Write($"\n{this.name.ToUpper()} ");
+            StringBuilder stringBuilder = new StringBuilder(); 
+            
+            //Console.Write($"{this.name.ToUpper()}\n");
 
             foreach (var item in _sendAndReceived)
             {
-                Console.WriteLine(item.ToString());
+                stringBuilder.Append(item.ToString());
+                stringBuilder.Append(Environment.NewLine); 
+                //Console.WriteLine(item.ToString());
             }
 
-            Console.WriteLine();
+            EscribirEnLaSalida(stringBuilder.ToString());
+            //Console.WriteLine(stringBuilder.ToString());
+
+            //Console.WriteLine();
         }
     }
 }
