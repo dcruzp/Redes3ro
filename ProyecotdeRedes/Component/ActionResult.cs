@@ -10,6 +10,7 @@ namespace ProyecotdeRedes
     {
        Ok=0, 
        Received=1,
-       None=2, 
+       Collision=2,
+       None=3, 
     }
 }

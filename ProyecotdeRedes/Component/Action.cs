@@ -9,7 +9,6 @@ namespace ProyecotdeRedes.Component
     public enum Action
     {
         Received = 0,
-        Send = 1,
-        Collision = 2
+        Send = 1
     }
 }

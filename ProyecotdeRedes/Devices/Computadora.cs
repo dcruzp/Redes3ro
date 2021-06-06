@@ -26,7 +26,7 @@ namespace ProyecotdeRedes
 
 
         /// <summary>
-        /// Esta es la direccion Max representada en hexadecimal 
+        /// Esta es la dirección Max representada en hexadecimal 
         /// </summary>
         string direccionMax;
 
@@ -37,7 +37,7 @@ namespace ProyecotdeRedes
         Queue<OneBitPackage> _sendAndReceived; 
 
 
-        uint tiempoEnElQuEmpezoAEnviar;
+        //uint tiempoEnElQuEmpezoAEnviar;
 
         Bit bitReceived;
 
@@ -53,7 +53,7 @@ namespace ProyecotdeRedes
         public Computadora(string name ,int indice) : base(name ,1, indice)
         {
             this.tiempoEnviando = 0;
-            this.tiempoEnElQuEmpezoAEnviar = 0;
+            //this.tiempoEnElQuEmpezoAEnviar = 0;
             this.porenviar = new Queue<Bit>();
             this.direccionMax = null;
             this._sendAndReceived = new Queue<OneBitPackage>();
@@ -63,8 +63,8 @@ namespace ProyecotdeRedes
 
 
         /// <summary>
-        /// Esto es para darle una direccion Mac a la computadora 
-        /// El paramentro es un string hexadecimal de 4 digitos
+        /// Esto es para darle una dirección Mac a la computadora 
+        /// El parámetro es un string hexadecimal de 4 dígitos
         /// </summary>
         /// <param name="dirMac"></param>
         public void PutMacDirection (string dirMac)
@@ -75,7 +75,7 @@ namespace ProyecotdeRedes
             }
             else
             {
-                throw new InvalidCastException($"No se pudo asignar la direccion Mac {dirMac} a la computadora {this.name}"); 
+                throw new InvalidCastException($"No se pudo asignar la dirección Mac {dirMac} a la computadora {this.name}"); 
             }
         }
 
@@ -112,15 +112,12 @@ namespace ProyecotdeRedes
         }
 
 
-
-
         /// <summary>
-        /// Esto retorna dado dos string que representa las direccion mac 
-        /// y la data a enviar en formato hexadecimal y retorna una lista 
-        /// de bits donde esta representado el frame que se quiere enviar  
+        /// Esto retorna una lista de Bits que tiene la secuencia de 
+        /// bits que representan los datos que se brindan en hexadecimal 
+        /// por el parámetro datainHex. (todo concatenado) 
         /// </summary>
-        /// <param name="mac"></param>
-        /// <param name="data"></param>
+        /// <param name="datainHex"></param>
         /// <returns></returns>
         private List<Bit>  PackageToSend (params string [] datainHex)
         {
@@ -143,10 +140,10 @@ namespace ProyecotdeRedes
                 return; 
             }
 
-            if (this.bitReceived == Bit.none) 
+            if (this.bitReceived == Bit.none)
+            {
                 this.bitReceived = this.bitentrada;
-
-
+            }
 
             if (this.bitReceived == this.bitentrada)
             {
@@ -237,7 +234,11 @@ namespace ProyecotdeRedes
                 if (tiempoEnviando >= Program.signal_time)
                 {
                     this.tiempoEnviando = 0;
-                    this.tiempoEnElQuEmpezoAEnviar = Program.current_time;
+                    this._sendAndReceived.Enqueue(new OneBitPackage(
+                                                                    time: Program.current_time,
+                                                                    action: Action.Send, 
+                                                                    bit: this.bitsalida,
+                                                                    actionResult: ActionResult.Ok));
                     this.porenviar.Dequeue();
                 }
             }
@@ -296,33 +297,40 @@ namespace ProyecotdeRedes
             
             if (this.BitdeSalida != Bit.none && hubocolision)
             {
-                this._sendAndReceived.Enqueue(new OneBitPackage(
-                                                                 Program.current_time,
-                                                                 Action.Send,
-                                                                 this.BitdeSalida));
-                //EscribirEnLaSalida(string.Format("{0} {1} send {2} collision", Program.current_time, this.Name, (int)this.BitdeSalida));
+                //this._sendAndReceived.Enqueue(new OneBitPackage(
+                //                                                 Program.current_time,
+                //                                                 Action.Send,
+                //                                                 this.BitdeSalida,
+                //                                                 actionResult: ActionResult.Collision));
+                
                 Actualizar();
                 return; 
             }
             else if (this.BitdeSalida != Bit.none)
             {
-                this._sendAndReceived.Enqueue(new OneBitPackage(
-                                                                 Program.current_time,
-                                                                 Action.Send,
-                                                                 this.BitdeSalida,
-                                                                 ActionResult.Ok));
+                //this._sendAndReceived.Enqueue(new OneBitPackage(
+                //                                                 Program.current_time,
+                //                                                 Action.Send,
+                //                                                 this.BitdeSalida,
+                //                                                 ActionResult.Ok));
 
-                //EscribirEnLaSalida(string.Format("{0} {1} send {2} Ok", Program.current_time, this.Name, (int)this.BitdeSalida));
+                
             }
             
             if (this.BitdeEntrada != Bit.none)
             {
-                //EscribirEnLaSalida(string.Format("{0} {1} receive {2} Ok", Program.current_time, this.Name, (int)this.BitdeEntrada));
+                //this._sendAndReceived.Enqueue(new OneBitPackage (
+                //                                                Program.current_time,
+                //                                                Action.Received);
             }
 
         }
 
 
+        /// <summary>
+        /// Esto es para imprimir los bit que recibió
+        /// el dispositivo
+        /// </summary>
         public void PrintReceivedBits ()
         {
             StringBuilder stringBuilder = new StringBuilder(); 
