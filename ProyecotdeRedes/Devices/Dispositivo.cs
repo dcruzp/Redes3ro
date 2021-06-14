@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
+using ProyecotdeRedes.Component;
+using Action = ProyecotdeRedes.Component.Action;
 
 namespace ProyecotdeRedes
 {
-    class Dispositivo
+    public class Dispositivo
     {
         /// <summary>
         /// Esto es para representar los puertos que 
@@ -44,8 +46,19 @@ namespace ProyecotdeRedes
         /// <summary>
         /// Esto es para representar la cantidad de puertos que tiene el dispositivo
         /// </summary>
-        protected int cantidaddepuertos; 
+        protected int cantidaddepuertos;
 
+
+        Bit bitReceived;
+
+
+        uint timeReceivedTheInputBit;
+
+
+        /// <summary>
+        /// Datos que se han recibido 
+        /// </summary>
+        protected Queue<OneBitPackage> _sendAndReceived;
 
 
         /// <summary>
@@ -62,14 +75,20 @@ namespace ProyecotdeRedes
             this.bitsalida = Bit.none;
             this.bitentrada = Bit.none;
             this.indice = indice;
-            this.cantidaddepuertos = cantidaddepuertos;             
+            this.cantidaddepuertos = cantidaddepuertos;
+
+            this.bitReceived = Bit.none;
 
             this.puertos = new Puerto[cantidaddepuertos];
 
             for (int i = 0; i < cantidaddepuertos; i++)
             {
-                this.puertos[i] = new Puerto(this.name + $"_{i}" , i); 
+                this.puertos[i] = new Puerto(this.name + $"_{i}" , i , this); 
             }
+
+            this.timeReceivedTheInputBit = 0;
+
+            this._sendAndReceived = new Queue<OneBitPackage>();
         }
 
         /// <summary>
@@ -226,6 +245,47 @@ namespace ProyecotdeRedes
         }
 
 
+
+        public void updateDataReceived()
+        {
+            if (this.bitentrada == Bit.none)
+            {
+                this.bitReceived = Bit.none;
+                this.timeReceivedTheInputBit = 0;
+                return;
+            }
+
+            if (this.bitReceived == Bit.none)
+            {
+                this.bitReceived = this.bitentrada;
+            }
+
+            if (this.bitReceived == this.bitentrada)
+            {
+                this.timeReceivedTheInputBit++;
+            }
+            else
+            {
+                this.bitReceived = this.bitentrada;
+                this.timeReceivedTheInputBit = 0;
+            }
+
+            if (this.timeReceivedTheInputBit == Program.signal_time)
+            {
+                OneBitPackage bitreceived = new OneBitPackage(
+                    Program.current_time,
+                    Action.Received,
+                    this.bitentrada);
+
+                this._sendAndReceived.Enqueue(bitreceived);
+                this.timeReceivedTheInputBit = 0;
+                this.bitReceived = Bit.none;
+            }
+        }
+
+
+
+
         /// <summary>
         /// Esto chequea si hubo colisión y escribe en las salidas los 
         /// valores correspondientes 
@@ -299,6 +359,8 @@ namespace ProyecotdeRedes
 
             return stringBuilder.ToString();
         }
+
+
 
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using ProyecotdeRedes.Auxiliaries;
+using ProyecotdeRedes.Component;
 
 namespace ProyecotdeRedes
 {
@@ -168,6 +169,15 @@ namespace ProyecotdeRedes
             }
         }
 
+
+        public static void ConnectPortsByCable(Cable cable , Puerto puerto1 , Puerto puerto2)
+        {
+            cable.puerto1 = puerto1;
+            cable.puerto2 = puerto2;
+
+            puerto1.ConnectCableToPort(cable);
+            puerto2.ConnectCableToPort(cable);
+        }
 
 
         public static void LanzarExepciondeCasteo(Instruccion instruccion)

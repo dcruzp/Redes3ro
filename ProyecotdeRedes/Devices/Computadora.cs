@@ -31,17 +31,10 @@ namespace ProyecotdeRedes
         string direccionMax;
 
 
-        /// <summary>
-        /// Datos que se han recibido 
-        /// </summary>
-        Queue<OneBitPackage> _sendAndReceived; 
+        
+        
 
-
-        //uint tiempoEnElQuEmpezoAEnviar;
-
-        Bit bitReceived;
-
-        uint timeReceivedTheInputBit; 
+       
 
         /// <summary>
         /// esto es para determinar el tiempo que ha estado la
@@ -53,12 +46,8 @@ namespace ProyecotdeRedes
         public Computadora(string name ,int indice) : base(name ,1, indice)
         {
             this.tiempoEnviando = 0;
-            //this.tiempoEnElQuEmpezoAEnviar = 0;
             this.porenviar = new Queue<Bit>();
             this.direccionMax = null;
-            this._sendAndReceived = new Queue<OneBitPackage>();
-            this.bitReceived = Bit.none;
-            this.timeReceivedTheInputBit = 0; 
         }
 
 
@@ -131,44 +120,6 @@ namespace ProyecotdeRedes
             return package; 
         }
 
-        public void updateDataReceived ()
-        {
-            if (this.bitentrada == Bit.none)
-            {
-                this.bitReceived = Bit.none;
-                this.timeReceivedTheInputBit = 0;
-                return; 
-            }
-
-            if (this.bitReceived == Bit.none)
-            {
-                this.bitReceived = this.bitentrada;
-            }
-
-            if (this.bitReceived == this.bitentrada)
-            {
-                this.timeReceivedTheInputBit++;
-            }
-            else
-            {
-                this.bitReceived = this.bitentrada;
-                this.timeReceivedTheInputBit = 0; 
-            }
-            
-            if (this.timeReceivedTheInputBit == Program.signal_time)
-            {
-                OneBitPackage bitreceived = new OneBitPackage(
-                    Program.current_time,
-                    Action.Received,
-                    this.bitentrada);
-
-                this._sendAndReceived.Enqueue(bitreceived);
-                this.timeReceivedTheInputBit = 0;
-                this.bitReceived = Bit.none; 
-            }
-        }
-
-
        
         /// <summary>
         /// Este método se llama cuando hubo una instrucción 
@@ -238,7 +189,7 @@ namespace ProyecotdeRedes
                                                                     time: Program.current_time,
                                                                     action: Action.Send, 
                                                                     bit: this.bitsalida,
-                                                                    actionResult: ActionResult.Ok));
+                                                                    actionResult:ActionResult.Ok));
                     this.porenviar.Dequeue();
                 }
             }
@@ -267,7 +218,7 @@ namespace ProyecotdeRedes
 
                 foreach (var item in current.PuertosConectados)
                 {
-                    Dispositivo dispconectado = item.DispositivoConectado;
+                    Dispositivo dispconectado = item.giveMeDisposotivoConectado;
                     if (mask[dispconectado.Indice]) continue;
 
                     int puertoporelqueestaconectado = item.NumeroPuertoAlQueEstaConectado;

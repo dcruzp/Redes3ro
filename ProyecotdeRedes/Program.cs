@@ -5,6 +5,7 @@ using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
 using ProyecotdeRedes.Auxiliaries;
+using ProyecotdeRedes.Component;
 
 namespace ProyecotdeRedes
 {
@@ -274,11 +275,12 @@ namespace ProyecotdeRedes
                 Puerto p1 = disp1.DameElPuerto(numeroport1);
                 Puerto p2 = disp2.DameElPuerto(numeroport2);
 
-                p1.DispositivoConectado = disp2;
-                p2.DispositivoConectado = disp1;
+                Cable cable = new Cable();
 
-                p1.PuertoAlQueEstaConnectado = port2;
-                p2.PuertoAlQueEstaConnectado = port1;
+                EnviromentActions.ConnectPortsByCable(cable, 
+                                                      puerto1: p1, 
+                                                      puerto2: p2);
+                
 
                 p1.EstaConectadoAOtroDispositivo = true;
                 p2.EstaConectadoAOtroDispositivo = true; 
@@ -412,8 +414,6 @@ namespace ProyecotdeRedes
                   
             }
         }
-
-       
 
 
         /// <summary>

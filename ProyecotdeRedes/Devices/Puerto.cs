@@ -1,12 +1,12 @@
-﻿using System;
+﻿using ProyecotdeRedes.Component;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace ProyecotdeRedes
 {
-    class Puerto
+    public class Puerto
     {
-
         /// <summary>
         /// esto es para representar le id que tiene el puerto en
         /// el dispositivo al que pertenece 
@@ -27,19 +27,20 @@ namespace ProyecotdeRedes
         string puertoalqueestaconectado;
 
 
-        /// <summary>
-        /// Esta es para tener la instancia del dispositivo que 
-        /// esta conectado por este puerto 
-        /// </summary>
-        Dispositivo _dispositivoConectado;
-        
-        
 
         /// <summary>
         /// Esto es para poner los bit de salida que hay en esta computadora 
         /// </summary>
-        Bit bitdesalida;
+        Bit _outBit;
 
+
+        Bit _inBit; 
+
+
+        Dispositivo _dispPertenece;
+
+
+        string _dirMac; 
 
         /// <summary>
         /// Esto es para saber que bits se han recibido de alguna 
@@ -54,14 +55,7 @@ namespace ProyecotdeRedes
         /// </summary>
         bool estaConectado;
 
-
-
-        public string PuertoAlQueEstaConnectado
-        {
-            get => this.puertoalqueestaconectado;
-            set => this.puertoalqueestaconectado = value;
-        }
-
+       
 
         /// <summary>
         /// Esto te retorna el indice del puerto al que esta conectado 
@@ -69,22 +63,34 @@ namespace ProyecotdeRedes
         /// </summary>
         public int NumeroPuertoAlQueEstaConectado
         {
-            get =>  (int.Parse(this.puertoalqueestaconectado.Split('_')[1]) -1);
-        } 
-
+            get => this.giveMePuertoConectado.numero_puerto;
+        }
 
         /// <summary>
         /// Esto te desconecta el puerto actual de cualquier otro puerto 
         /// al que se encuentre conectado 
         /// </summary>
+
+        protected ICable _cable;  
+        
+        public string DirMac
+        {
+            get => this._dirMac;
+            set => this._dirMac = value; 
+        }
+
         public void DesconectarElPuerto()
         {
             this.puertoalqueestaconectado = null;
-            this._dispositivoConectado = null;
-            this.bitdesalida = Bit.none;
+            this._outBit = Bit.none;
             this.estaConectado = false;
 
             LimpiarEntradas(); 
+        }
+
+        public int NumeroPuerto
+        {
+            get => this.numero_puerto;
         }
 
         /// <summary>
@@ -92,21 +98,59 @@ namespace ProyecotdeRedes
         /// </summary>
         /// <param name="id_puerto"></param>
         /// <param name="numero_puerto"></param>
-        public Puerto (string id_puerto , int numero_puerto)
+        public Puerto (string id_puerto , int numero_puerto,Dispositivo dispositivo)
         {
             this.id_puerto = id_puerto;
-            this.bitdesalida = Bit.none;
+            this._outBit = Bit.none;
             this.numero_puerto = numero_puerto;
+            this._cable = null;
+            this._dispPertenece = dispositivo;
 
             entradas = new bool[Enum.GetNames(typeof(Bit)).Length];
         }
 
+        public Dispositivo DispPertenece
+        {
+            get => this._dispPertenece;
+        }
+
+        public Puerto giveMePuertoConectado
+        {
+            get
+            {
+                return _cable.puerto1.Equals(this) ?
+                    _cable.puerto2 : _cable.puerto1;
+            }
+        }
+
+        public Dispositivo giveMeDisposotivoConectado
+        {
+            get
+            {
+                Puerto puertoconectado = _cable.puerto1.Equals(this) ?
+                    _cable.puerto2 : _cable.puerto1;
+
+                return puertoconectado._dispPertenece;
+            }
+
+        }
+
+        public bool ConnectCableToPort (Cable cable)
+        {
+            if (_cable != null )
+            {
+                return false; 
+            }
+            _cable = cable;
+            return true; 
+        }
 
         public bool EstaConectadoAOtroDispositivo
         {
             get => this.estaConectado;
             set => this.estaConectado = value; 
         }
+       
         public string ID_Puerto
         {
             get => this.id_puerto;
@@ -117,18 +161,17 @@ namespace ProyecotdeRedes
             get => this.numero_puerto; 
         }
 
-
-        public Bit BitdeSalida
+        public Bit OutBit
         {
-            get => this.bitdesalida;
-            set => this.bitdesalida = value;
+            get => this._outBit;
+            set => this._outBit = value;
         }
 
 
-        public Dispositivo DispositivoConectado
+        public Bit InBit
         {
-            get => this._dispositivoConectado;
-            set => this._dispositivoConectado = value; 
+            get => this._inBit;
+            set => this._inBit = value; 
         }
 
 
@@ -154,7 +197,7 @@ namespace ProyecotdeRedes
 
 
         /// <summary>
-        /// Esto actualiza y pone en las entradas el bit que se recibio
+        /// Esto actualiza y pone en las entradas el bit que se recibió
         /// </summary>
         /// <param name="bit"></param>
         public void RecibirUnBit (Bit bit)
