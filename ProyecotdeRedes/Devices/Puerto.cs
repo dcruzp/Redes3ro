@@ -1,11 +1,13 @@
 ﻿using ProyecotdeRedes.Component;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using Action = ProyecotdeRedes.Component.Action;
+using Byte = ProyecotdeRedes.Component.Byte;
 
-namespace ProyecotdeRedes
+namespace ProyecotdeRedes.Devices
 {
-    public class Puerto
+    public class Puerto:IPuertos
     {
         /// <summary>
         /// esto es para representar le id que tiene el puerto en
@@ -24,7 +26,7 @@ namespace ProyecotdeRedes
         /// <summary>
         /// Este es el nombre del puerto al que esta conectado 
         /// </summary>
-        string puertoalqueestaconectado;
+        //string puertoalqueestaconectado;
 
 
 
@@ -32,6 +34,18 @@ namespace ProyecotdeRedes
         /// Esto es para poner los bit de salida que hay en esta computadora 
         /// </summary>
         Bit _outBit;
+
+
+        /// <summary>
+        /// Esto es para representar los bits de entrada por el puerto 
+        /// </summary>
+        Queue<Bit> queueinput;
+
+
+        /// <summary>
+        /// Esto es una cola para representar los bit de salidas por el puerto 
+        /// </summary>
+        Queue<Bit> queueoutput; 
 
 
         Bit _inBit; 
@@ -73,6 +87,10 @@ namespace ProyecotdeRedes
 
         protected ICable _cable;  
         
+        /// <summary>
+        /// Esta es la dirección Mac del dispositivo que esta conectada
+        /// a este dispositivo
+        /// </summary>
         public string DirMac
         {
             get => this._dirMac;
@@ -81,7 +99,7 @@ namespace ProyecotdeRedes
 
         public void DesconectarElPuerto()
         {
-            this.puertoalqueestaconectado = null;
+            //this.puertoalqueestaconectado = null;
             this._outBit = Bit.none;
             this.estaConectado = false;
 
@@ -105,8 +123,20 @@ namespace ProyecotdeRedes
             this.numero_puerto = numero_puerto;
             this._cable = null;
             this._dispPertenece = dispositivo;
+            this.queueinput = new Queue<Bit>();
+            this.queueoutput = new Queue<Bit>();
+            this._history = new List<OneBitPackage>(); 
 
             entradas = new bool[Enum.GetNames(typeof(Bit)).Length];
+        }
+
+
+        public void SendData (List<Bit> datatosend)
+        {
+            foreach (var item in datatosend)
+            {
+                this.queueoutput.Enqueue(item);
+            }
         }
 
         public Dispositivo DispPertenece
@@ -203,6 +233,160 @@ namespace ProyecotdeRedes
         public void RecibirUnBit (Bit bit)
         {
             this.entradas[(int)bit] = true; 
+        }
+
+
+        private int time_sending = 0;
+
+        private List<OneBitPackage> _history;
+
+        private int time_received = 0;
+
+        private int time_received_byte = 0; 
+
+        private Bit AuxInBit = Bit.none;
+
+        public void UpdateInBit ()
+        {
+            this.InBit = this.GiveMeInBit();
+
+            if (this.InBit == Bit.none)
+            {
+                this.AuxInBit = Bit.none;
+                this.time_received = 0;
+                this.time_received_byte = 0; 
+                return;
+            }
+
+            if (this.AuxInBit == Bit.none)
+            {
+                this.AuxInBit = this.InBit;
+            }
+
+            if (this.AuxInBit == this.InBit)
+            {
+                this.time_received++;
+            }
+            else
+            {
+                this.AuxInBit = this.InBit;
+                this.time_received = 0;
+                this.time_received_byte = 0; 
+            }
+
+            if (this.time_received >= Program.signal_time)
+            {
+                OneBitPackage bitreceived = new OneBitPackage(
+                    Program.current_time,
+                    Action.Received,
+                    this.InBit);
+
+                this._history.Add(bitreceived);
+
+                time_received_byte++; 
+
+                if (time_received_byte == 8 )
+                {
+
+                    OneBytePackage oneBitPackage = BuildBytePackage();
+
+                    this.DispPertenece.BytesReceives.Add(oneBitPackage);
+                    this.DispPertenece.ProcessDataReceived();
+                    
+                    //Console.WriteLine($"Recibio un byte en el milisegundo {Program.current_time}");
+                    time_received_byte = 0; 
+                }
+
+                Console.WriteLine(this.DispPertenece.Name);
+                Console.WriteLine(bitreceived.ToString());               
+
+                this.time_received = 0;
+                this.AuxInBit = Bit.none;
+            }
+        }
+
+
+        private OneBytePackage BuildBytePackage ()
+        {
+            Bit[] bits = this._history.TakeLast(8).Select(x => x.Bit).ToArray();
+
+            Byte @byte = new Byte(bits);
+
+            OneBytePackage oneBytePackage = new OneBytePackage();
+            oneBytePackage.Byte = @byte;
+            oneBytePackage.portreceived = this.id_puerto;
+            oneBytePackage.time_received = Program.current_time;
+
+            return oneBytePackage;
+        }
+
+        /// <summary>
+        /// Este metodo es para actualizar el bit de la salida del 
+        /// puerto. Este metodo mantine el bit de salida 10 ms en 
+        /// la salida y cuando se termina de transmitir este bit 
+        /// entonces se procede a enviar el proximo en la cola de 
+        /// salida
+        /// </summary>
+        public void UpdateOutBit()
+        {
+
+            if (this.queueoutput.Count == 0)
+            {
+                this.OutBit = Bit.none;
+            }
+            else
+            {
+
+                //if (this.tiempoesperandoparavolveraenviar > 0)
+                //{
+                //    this.tiempoesperandoparavolveraenviar--;
+                //    this.bitsalida = Bit.none;
+                //    return;
+                //}
+
+                this.OutBit = queueoutput.Peek();
+
+                time_sending++;
+
+                if (time_sending >= Program.signal_time)
+                {
+                    this.time_sending = 0;
+
+                    OneBitPackage oneBitPackage = new OneBitPackage(
+                                                                    time: Program.current_time,
+                                                                    action: Action.Send,
+                                                                    bit: this.OutBit,
+                                                                    actionResult: ActionResult.Ok);
+
+
+                    Console.WriteLine(oneBitPackage.ToString());
+
+                    _history.Add(oneBitPackage);           
+                    
+                    this.queueoutput.Dequeue();
+                }
+            }
+        }
+
+       
+       
+        public Bit GiveMeOutBit()
+        {
+            return this.OutBit;
+        }
+
+        public Bit GiveMeInBit()
+        {
+            if (this._cable == null) return Bit.none; 
+
+            Puerto otherPort  = this._cable.puerto1.Equals(this) ?
+                this._cable.puerto2:
+                this._cable.puerto1;
+            return otherPort.GiveMeOutBit();
+        }
+
+        public Cable Cable {
+            set => this._cable = value;
         }
     }
 }

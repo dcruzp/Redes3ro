@@ -25,7 +25,10 @@ namespace ProyecotdeRedes.Component
             _actionResult = actionResult; 
         }
 
-
+        public Bit Bit
+        {
+            get => this._bit;
+        }
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();

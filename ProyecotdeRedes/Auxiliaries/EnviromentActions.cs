@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using ProyecotdeRedes.Auxiliaries;
 using ProyecotdeRedes.Component;
+using ProyecotdeRedes.Devices;
 
 namespace ProyecotdeRedes
 {
@@ -174,6 +175,9 @@ namespace ProyecotdeRedes
         {
             cable.puerto1 = puerto1;
             cable.puerto2 = puerto2;
+
+            puerto1.Cable = cable;
+            puerto2.Cable = cable; 
 
             puerto1.ConnectCableToPort(cable);
             puerto2.ConnectCableToPort(cable);

@@ -18,11 +18,7 @@ namespace ProyecotdeRedes
         Queue<Bit> porenviar;
         
 
-        /// <summary>
-        /// Este es el tiempo que el bit que esta enviándose 
-        /// ha estado transmitiéndose a las demás computadoras. 
-        /// </summary>
-        uint tiempoEnviando;
+        
 
 
         /// <summary>
@@ -44,8 +40,7 @@ namespace ProyecotdeRedes
         uint tiempoesperandoparavolveraenviar; 
 
         public Computadora(string name ,int indice) : base(name ,1, indice)
-        {
-            this.tiempoEnviando = 0;
+        {           
             this.porenviar = new Queue<Bit>();
             this.direccionMax = null;
         }
@@ -77,7 +72,7 @@ namespace ProyecotdeRedes
         {
             this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(5,50);
             Console.WriteLine($"{this.name}  va a esperar {this.tiempoesperandoparavolveraenviar} para volver a enviar un dato");
-            this.tiempoEnviando = 0;
+           
         }
         
         public void send_frame (string mac , string data)
@@ -92,33 +87,23 @@ namespace ProyecotdeRedes
 
             while (lenghtdata.Length < 2) lenghtdata = "0" + lenghtdata;
 
-            packagetosend = PackageToSend(dirmaxin, dirmacout, lenghtdata, "00", data);
+            packagetosend = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(dirmaxin, dirmacout, lenghtdata, "00", data);
 
-            foreach (var item in packagetosend)
+            //packagetosend.AddRange(packagetosend);
+
+            foreach (var item in puertos)
             {
-                this.porenviar.Enqueue(item); 
+                item.SendData(packagetosend);
             }
+
+            Console.WriteLine($"Enviado por la computadora '{this.name}' el " +
+                $"paquete {AuxiliaryFunctions.ConvertToStringPackage(packagetosend)}");
+
+
         }
 
 
-        /// <summary>
-        /// Esto retorna una lista de Bits que tiene la secuencia de 
-        /// bits que representan los datos que se brindan en hexadecimal 
-        /// por el parámetro datainHex. (todo concatenado) 
-        /// </summary>
-        /// <param name="datainHex"></param>
-        /// <returns></returns>
-        private List<Bit>  PackageToSend (params string [] datainHex)
-        {
-            var package = new List<Bit>();
-
-            foreach (var item in datainHex)
-            {
-                package.AddRange(AuxiliaryFunctions.convertFromHexStrToBitArray(item));
-            }
-
-            return package; 
-        }
+       
 
        
         /// <summary>
@@ -126,7 +111,7 @@ namespace ProyecotdeRedes
         /// send para el envío de un paquete de bits
         /// </summary>
         /// <param name="paquete"></param>
-        public void send(Bit [] paquete)
+        public void send(List<Bit> paquete)
         {
             foreach (var item in paquete)
             {
@@ -144,56 +129,17 @@ namespace ProyecotdeRedes
         /// <returns></returns>
         public bool EnviarInformacionALasDemasComputadoras()
         {
-            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
-                return false; 
+            //if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
+            //    return false; 
             
-            ActualizarElBitDeSalida();
+            //ActualizarElBitDeSalida();
             EnviarElBitQueHayEnLaSalidaALasDemasComputadoras();
 
             return true; 
         }
 
 
-        /// <summary>
-        /// Este método pone el bit de salida que le corresponde
-        /// es ese mili segundo estar en la salida . Este método se 
-        /// llama una sola vez en cada mili segundo de ejecución del 
-        /// programa
-        /// </summary>
-        public void ActualizarElBitDeSalida()
-        {
-            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)  return;
-
-            if (this.porenviar.Count == 0)
-            {
-                this.bitsalida = Bit.none;
-            }
-            else
-            {
-
-                if (this.tiempoesperandoparavolveraenviar > 0)
-                {
-                    this.tiempoesperandoparavolveraenviar--;
-                    this.bitsalida = Bit.none;
-                    return;
-                }
-
-                this.bitsalida = porenviar.Peek();
-
-                tiempoEnviando++;
-
-                if (tiempoEnviando >= Program.signal_time)
-                {
-                    this.tiempoEnviando = 0;
-                    this._sendAndReceived.Enqueue(new OneBitPackage(
-                                                                    time: Program.current_time,
-                                                                    action: Action.Send, 
-                                                                    bit: this.bitsalida,
-                                                                    actionResult:ActionResult.Ok));
-                    this.porenviar.Dequeue();
-                }
-            }
-        }
+        
 
 
         /// <summary>
@@ -223,7 +169,7 @@ namespace ProyecotdeRedes
 
                     int puertoporelqueestaconectado = item.NumeroPuertoAlQueEstaConectado;
                    
-                    dispconectado.recibirUnBit(puertoporelqueestaconectado, this.bitsalida); 
+                    //dispconectado.recibirUnBit(puertoporelqueestaconectado, this.bitsalida); 
                     
                     mask[dispconectado.Indice] = true;
                     queue.Enqueue(dispconectado); 
@@ -246,34 +192,34 @@ namespace ProyecotdeRedes
             bool hubocolision = HuboUnaColision();
 
             
-            if (this.BitdeSalida != Bit.none && hubocolision)
-            {
-                //this._sendAndReceived.Enqueue(new OneBitPackage(
-                //                                                 Program.current_time,
-                //                                                 Action.Send,
-                //                                                 this.BitdeSalida,
-                //                                                 actionResult: ActionResult.Collision));
+            //if (this.BitdeSalida != Bit.none && hubocolision)
+            //{
+            //    //this._sendAndReceived.Enqueue(new OneBitPackage(
+            //    //                                                 Program.current_time,
+            //    //                                                 Action.Send,
+            //    //                                                 this.BitdeSalida,
+            //    //                                                 actionResult: ActionResult.Collision));
                 
-                Actualizar();
-                return; 
-            }
-            else if (this.BitdeSalida != Bit.none)
-            {
-                //this._sendAndReceived.Enqueue(new OneBitPackage(
-                //                                                 Program.current_time,
-                //                                                 Action.Send,
-                //                                                 this.BitdeSalida,
-                //                                                 ActionResult.Ok));
+            //    Actualizar();
+            //    return; 
+            //}
+            //else if (this.BitdeSalida != Bit.none)
+            //{
+            //    //this._sendAndReceived.Enqueue(new OneBitPackage(
+            //    //                                                 Program.current_time,
+            //    //                                                 Action.Send,
+            //    //                                                 this.BitdeSalida,
+            //    //                                                 ActionResult.Ok));
 
                 
-            }
+            //}
             
-            if (this.BitdeEntrada != Bit.none)
-            {
-                //this._sendAndReceived.Enqueue(new OneBitPackage (
-                //                                                Program.current_time,
-                //                                                Action.Received);
-            }
+            //if (this.BitdeEntrada != Bit.none)
+            //{
+            //    //this._sendAndReceived.Enqueue(new OneBitPackage (
+            //    //                                                Program.current_time,
+            //    //                                                Action.Received);
+            //}
 
         }
 
@@ -282,7 +228,7 @@ namespace ProyecotdeRedes
         /// Esto es para imprimir los bit que recibió
         /// el dispositivo
         /// </summary>
-        public void PrintReceivedBits ()
+        public void PrintReceivedBits()
         {
             StringBuilder stringBuilder = new StringBuilder(); 
             

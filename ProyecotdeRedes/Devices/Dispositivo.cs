@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using ProyecotdeRedes.Component;
+using ProyecotdeRedes.Devices;
 using Action = ProyecotdeRedes.Component.Action;
+using Byte = ProyecotdeRedes.Component.Byte;
 
 namespace ProyecotdeRedes
 {
@@ -26,7 +28,7 @@ namespace ProyecotdeRedes
         /// Esto es para representar el bit de salida del dispositivo 
         /// inicialmente este es None
         /// </summary>
-        protected Bit bitsalida;
+        //protected Bit bitsalida;
 
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace ProyecotdeRedes
         public Dispositivo (string name , int cantidaddepuertos , int indice )
         {
             this.name = name;            
-            this.bitsalida = Bit.none;
+            //this.bitsalida = Bit.none;
             this.bitentrada = Bit.none;
             this.indice = indice;
             this.cantidaddepuertos = cantidaddepuertos;
@@ -89,6 +91,10 @@ namespace ProyecotdeRedes
             this.timeReceivedTheInputBit = 0;
 
             this._sendAndReceived = new Queue<OneBitPackage>();
+
+            this.BytesReceives = new List<OneBytePackage>();
+
+            this._history = new List<DataFramePackage>(); 
         }
 
         /// <summary>
@@ -102,27 +108,9 @@ namespace ProyecotdeRedes
         }
 
 
-        /// <summary>
-        /// solo es de consulta externa , es decir este valor no se puede 
-        /// modificar desde fiera de la clase o de sus descendientes 
-        /// </summary>
-        public Bit BitdeSalida
-        {
-            get => this.bitsalida;
-           
-        }
+       
 
-
-        /// <summary>
-        /// Este es para poder acceder al bit de entrada del 
-        /// dispositivo y poder cambiar su valor , esto esta mal diseñado 
-        /// pero se puede modificar con unos pocos cambios 
-        /// </summary>
-        public Bit BitdeEntrada
-        {
-            get => this.bitentrada;
-            set => this.bitentrada = value; 
-        }
+        
 
 
         /// <summary>
@@ -205,16 +193,7 @@ namespace ProyecotdeRedes
         }
 
 
-        /// <summary>
-        /// Esto escribe el bit que se pasa por el parámetro Bit 
-        /// en el puerto que se indica en el parámetro puerto
-        /// </summary>
-        /// <param name="puerto"></param>
-        /// <param name="bit"></param>
-        public void recibirUnBit (int puerto, Bit bit)
-        {            
-            this.puertos[puerto].RecibirUnBit(bit); 
-        }
+        
 
 
         /// <summary>
@@ -244,47 +223,51 @@ namespace ProyecotdeRedes
             return false; 
         }
 
-
-
-        public void updateDataReceived()
+        /// <summary>
+        /// Este método pone el bit de salida que le corresponde
+        /// es ese mili segundo estar en la salida . Este método se 
+        /// llama una sola vez en cada mili segundo de ejecución del 
+        /// programa
+        /// </summary>
+        public void UpdateSendingBit()
         {
-            if (this.bitentrada == Bit.none)
+            foreach (var item in this.puertos)
             {
-                this.bitReceived = Bit.none;
-                this.timeReceivedTheInputBit = 0;
-                return;
-            }
-
-            if (this.bitReceived == Bit.none)
-            {
-                this.bitReceived = this.bitentrada;
-            }
-
-            if (this.bitReceived == this.bitentrada)
-            {
-                this.timeReceivedTheInputBit++;
-            }
-            else
-            {
-                this.bitReceived = this.bitentrada;
-                this.timeReceivedTheInputBit = 0;
-            }
-
-            if (this.timeReceivedTheInputBit == Program.signal_time)
-            {
-                OneBitPackage bitreceived = new OneBitPackage(
-                    Program.current_time,
-                    Action.Received,
-                    this.bitentrada);
-
-                this._sendAndReceived.Enqueue(bitreceived);
-                this.timeReceivedTheInputBit = 0;
-                this.bitReceived = Bit.none;
+                item.UpdateOutBit();
             }
         }
 
 
+        public List<OneBytePackage> BytesReceives { get; set; } 
 
+
+        public void updateDataReceived()
+        {
+            foreach (var item in this.puertos)
+            {
+                item.UpdateInBit();
+            }
+        }
+
+
+        DataFramePackage currentBuildInFrame;
+
+        public List<DataFramePackage> _history { get; set; }
+
+        public void ProcessDataReceived()
+        {
+            if (currentBuildInFrame == null)
+            {
+                currentBuildInFrame = new DataFramePackage(); 
+            }
+            
+            currentBuildInFrame.InsertNextByte(this.BytesReceives[this.BytesReceives.Count - 1].Byte);
+            if (currentBuildInFrame.FullData)
+            {
+                _history.Add(currentBuildInFrame);
+                currentBuildInFrame = null; 
+            }
+        }
 
         /// <summary>
         /// Esto chequea si hubo colisión y escribe en las salidas los 
@@ -325,16 +308,16 @@ namespace ProyecotdeRedes
         /// esto limpia el array de bit recibido por las computadoras en un 
         /// mili segundo determinado 
         /// </summary>
-        public void LimpiarLosParametrosDeEntrada()
-        {
+        //public void LimpiarLosParametrosDeEntrada()
+        //{
 
-            foreach (var item in this.PuertosConectados)
-            {
-                item.LimpiarEntradas();
-            }
+        //    foreach (var item in this.PuertosConectados)
+        //    {
+        //        item.LimpiarEntradas();
+        //    }
 
-            this.BitdeEntrada = Bit.none; 
-        }
+        //    this.BitdeEntrada = Bit.none; 
+        //}
 
         public override string ToString()
         {
@@ -342,7 +325,7 @@ namespace ProyecotdeRedes
 
             stringBuilder.Append($"{this.name} \n");
 
-            stringBuilder.Append($"Bit de Salida:\t {(int)this.BitdeSalida}\n");
+            //stringBuilder.Append($"Bit de Salida:\t {(int)this.BitdeSalida}\n");
 
             stringBuilder.Append($"Bit de Entradas:\n");
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ProyecotdeRedes.Auxiliaries;
 using ProyecotdeRedes.Component;
+using ProyecotdeRedes.Devices;
 
 namespace ProyecotdeRedes
 {
@@ -57,24 +58,74 @@ namespace ProyecotdeRedes
         
         static void Main(string[] args)
         {
-            RunAplication();
+            //RunAplication();
 
 
-            foreach (var item in Program.dispositivos.Where(x => x is Computadora))
+            //foreach (var item in Program.dispositivos.Where(x => x is Computadora))
+            //{
+            //    Computadora comp = item as Computadora;
+
+            //    if (comp is null) continue;
+
+            //    comp.PrintReceivedBits();
+            //}
+
+
+
+
+            TestMethod(); 
+
+        }
+
+
+        public static void TestMethod ()
+        {
+            Switch @switch = new Switch("sw",4,0);
+
+            Computadora computadora1 = new Computadora("pc1",1);
+            Computadora computadora2 = new Computadora("pc2", 2);
+
+            Cable cable1 = new Cable();
+            Cable cable2 = new Cable(); 
+
+            Puerto pc1 = computadora1.DameElPuerto(0);
+            Puerto pc2 = computadora2.DameElPuerto(0);
+            Puerto ps1 = @switch.DameElPuerto(0);
+            Puerto ps2 = @switch.DameElPuerto(1);
+
+            //pc.EstaConectadoAOtroDispositivo = true;
+            //ps1.EstaConectadoAOtroDispositivo = true;
+
+            EnviromentActions.ConnectPortsByCable(cable1, pc1, ps1);
+            EnviromentActions.ConnectPortsByCable(cable2, pc2, ps2);
+
+            computadora1.PutMacDirection("A5B3");
+            computadora2.PutMacDirection("A5B4");
+
+            while(current_time < Program.tiempo_maximo)
             {
-                Computadora comp = item as Computadora;
+                SendPackages(computadora1);
 
-                if (comp is null) continue;
+                computadora1.UpdateSendingBit();
+                @switch.UpdateSendingBit();
 
-                comp.PrintReceivedBits();
+                computadora1.updateDataReceived();
+                @switch.updateDataReceived();
+
+                current_time++; 
             }
         }
 
 
-        public void ConfigureAplication()
+        private static void SendPackages(Computadora comp)
         {
-
+            if (current_time == 1)
+            {
+                comp.send_frame("A5B4", "A6F43400FFB34E");
+            }
         }
+
+
 
         public static void RunAplication()
         {
@@ -87,13 +138,11 @@ namespace ProyecotdeRedes
             EnviromentActions.LimpiarDirectoriodeSalida();
 
 
-
             //Esta es para cargar todos las instrucciones que hay en el fichero 'script.txt' 
             //para almacenarlos en memoria , todas las instrucciones que hay en el fichero quedan 
             //almacenadas en instrucciones , ordenadas por el tiempo de ejecución de la instrucción 
             //de forma ascendente, para que una vez hallan sido ejecutadas salgan de la cola.  
             EnviromentActions.CargarInstrucciones();
-
 
 
             //Este métodos es para configurar todo el entorno del programa ,como signal_time , cantidad
@@ -142,7 +191,7 @@ namespace ProyecotdeRedes
 
                     //--------------------------------------------------------
 
-                    item.LimpiarLosParametrosDeEntrada();
+                    //item.LimpiarLosParametrosDeEntrada();
 
                 }
 
@@ -319,7 +368,7 @@ namespace ProyecotdeRedes
                     paquetedebits.Add((Bit)int.Parse(item.ToString())); 
                 }
 
-                computadora.send(paquetedebits.ToArray()); 
+                computadora.send(paquetedebits); 
             }
 
             else if (tipoinstruccion == TipodeInstruccion.disconnect)

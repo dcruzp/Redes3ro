@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ProyecotdeRedes.Devices;
 
 namespace ProyecotdeRedes.Component
 {

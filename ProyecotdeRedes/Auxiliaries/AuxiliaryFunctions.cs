@@ -8,6 +8,22 @@ namespace ProyecotdeRedes.Auxiliaries
 {
     public class AuxiliaryFunctions
     {
+        public static int FromByteDataToInt (List<Bit> data)
+        {
+            StringBuilder stringBuilder = new StringBuilder(data.Count);
+
+            foreach (var item in data)
+            {
+                stringBuilder.Append(((int)item).ToString());
+            }
+
+            int lenghtData = Convert.ToInt32(stringBuilder.ToString(), 2);
+
+            return lenghtData;
+        }
+
+
+
         public static Bit[] convertFromHexStrToBitArray(string hexString)
         {
             List<Bit> bitArray = new List<Bit>();
@@ -91,6 +107,38 @@ namespace ProyecotdeRedes.Auxiliaries
                 default:
                     throw new InvalidCastException($" '{instruction}' no ese un tipo de instrucción valida");
             }
+        }
+
+        public static string ConvertToStringPackage(List<Bit> package)
+        {
+            StringBuilder stringBuilder = new StringBuilder(package.Count);
+
+            foreach (var item in package)
+            {
+                stringBuilder.Append(((int)item).ToString());
+            }
+
+            return stringBuilder.ToString(); 
+        }
+
+
+        /// <summary>
+        /// Esto retorna una lista de Bits que tiene la secuencia de 
+        /// bits que representan los datos que se brindan en hexadecimal 
+        /// por el parámetro datainHex. (todo concatenado) 
+        /// </summary>
+        /// <param name="datainHex"></param>
+        /// <returns></returns>
+        public static List<Bit> ConvertToListOfBitHexadecimalSequence(params string[] datainHex)
+        {
+            var package = new List<Bit>();
+
+            foreach (var item in datainHex)
+            {
+                package.AddRange(convertFromHexStrToBitArray(item));
+            }
+
+            return package;
         }
     }
 }

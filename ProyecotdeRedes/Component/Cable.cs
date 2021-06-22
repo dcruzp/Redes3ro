@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using ProyecotdeRedes.Devices;
+using ProyecotdeRedes.Component;
 
 namespace ProyecotdeRedes.Component
 {
