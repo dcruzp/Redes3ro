@@ -97,7 +97,7 @@ namespace ProyecotdeRedes
             }
 
             Console.WriteLine($"Enviado por la computadora '{this.name}' el " +
-                $"paquete {AuxiliaryFunctions.ConvertToStringPackage(packagetosend)}");
+                $"paquete {AuxiliaryFunctions.FromByteDataToHexadecimal(packagetosend)}");
 
 
         }
@@ -228,23 +228,46 @@ namespace ProyecotdeRedes
         /// Esto es para imprimir los bit que recibió
         /// el dispositivo
         /// </summary>
-        public void PrintReceivedBits()
-        {
-            StringBuilder stringBuilder = new StringBuilder(); 
+        //public void PrintReceivedBits()
+        //{
+        //    StringBuilder stringBuilder = new StringBuilder(); 
             
-            //Console.Write($"{this.name.ToUpper()}\n");
+        //    //Console.Write($"{this.name.ToUpper()}\n");
 
-            foreach (var item in _sendAndReceived)
+        //    foreach (var item in _sendAndReceived)
+        //    {
+        //        stringBuilder.Append(item.ToString());
+        //        stringBuilder.Append(Environment.NewLine); 
+        //        //Console.WriteLine(item.ToString());
+        //    }
+
+        //    EscribirEnLaSalida(stringBuilder.ToString());
+        //    //Console.WriteLine(stringBuilder.ToString());
+
+        //    //Console.WriteLine();
+        //}
+
+        public override void ProcessDataReceived()
+        {
+            base.ProcessDataReceived();
+
+            if (currentBuildInFrame.FullData)
             {
-                stringBuilder.Append(item.ToString());
-                stringBuilder.Append(Environment.NewLine); 
-                //Console.WriteLine(item.ToString());
+                _history.Add(currentBuildInFrame);
+                WriteDataReceivedInOutput(currentBuildInFrame);
+                currentBuildInFrame = null;
             }
+        }
 
-            EscribirEnLaSalida(stringBuilder.ToString());
-            //Console.WriteLine(stringBuilder.ToString());
+        private void WriteDataReceivedInOutput(DataFramePackage package)
+        {
+            uint time_received = package.TimeReceived;
+            string pcout = AuxiliaryFunctions.FromByteDataToHexadecimal(package.MacOut);
+            string data = AuxiliaryFunctions.FromByteDataToHexadecimal(package.Data);
 
-            //Console.WriteLine();
+            string dataFrame = package.ToString();
+
+            this.EscribirEnLaSalida(dataFrame , this.name + "_data.txt");
         }
     }
 }

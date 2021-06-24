@@ -60,7 +60,7 @@ namespace ProyecotdeRedes
         /// <summary>
         /// Datos que se han recibido 
         /// </summary>
-        protected Queue<OneBitPackage> _sendAndReceived;
+        //protected Queue<OneBitPackage> _sendAndReceived;
 
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace ProyecotdeRedes
 
             this.timeReceivedTheInputBit = 0;
 
-            this._sendAndReceived = new Queue<OneBitPackage>();
+            //this._sendAndReceived = new Queue<OneBitPackage>();
 
             this.BytesReceives = new List<OneBytePackage>();
 
@@ -106,13 +106,9 @@ namespace ProyecotdeRedes
         {
             get => this.indice;
         }
-
-
-       
+              
 
         
-
-
         /// <summary>
         /// para saber el numero de puertos del dispositivo 
         /// </summary>
@@ -159,7 +155,7 @@ namespace ProyecotdeRedes
             }
         }
 
-      
+
         /// <summary>
         /// Esto crea un fichero si no existe , y si existe lo abre y 
         /// escribe lo que se le pasa por el parámetro indicado en recibo
@@ -167,9 +163,11 @@ namespace ProyecotdeRedes
         /// por esta clase , (nombredeldispositivo .txt)
         /// </summary>
         /// <param name="recibo"></param>
-        public void EscribirEnLaSalida(string recibo)
+        public void EscribirEnLaSalida(string recibo, string filename =null)
         {
-            string rutaCompleta = Path.Join(DirectorioDeSalida(),this.name + ".txt");
+            string fileName = filename==null ?  this.name + ".txt" : filename;
+
+            string rutaCompleta = Path.Join(DirectorioDeSalida(),fileName);
 
             //se crea el archivo si no existe y lo abre si ya existe 
             using (StreamWriter mylogs = File.AppendText(rutaCompleta))      
@@ -250,11 +248,13 @@ namespace ProyecotdeRedes
         }
 
 
-        DataFramePackage currentBuildInFrame;
+        protected DataFramePackage currentBuildInFrame;
 
         public List<DataFramePackage> _history { get; set; }
 
-        public void ProcessDataReceived()
+
+
+        public virtual void ProcessDataReceived()
         {
             if (currentBuildInFrame == null)
             {
@@ -262,11 +262,18 @@ namespace ProyecotdeRedes
             }
             
             currentBuildInFrame.InsertNextByte(this.BytesReceives[this.BytesReceives.Count - 1].Byte);
+            
             if (currentBuildInFrame.FullData)
             {
-                _history.Add(currentBuildInFrame);
-                currentBuildInFrame = null; 
+                string salida = this.name + " ===>> " + currentBuildInFrame.ToString(); 
+                Console.WriteLine(salida);
             }
+
+            //if (currentBuildInFrame.FullData)
+            //{
+            //    _history.Add(currentBuildInFrame);
+            //    currentBuildInFrame = null; 
+            //}
         }
 
         /// <summary>

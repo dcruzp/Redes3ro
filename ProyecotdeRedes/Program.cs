@@ -58,28 +58,15 @@ namespace ProyecotdeRedes
         
         static void Main(string[] args)
         {
-            //RunAplication();
-
-
-            //foreach (var item in Program.dispositivos.Where(x => x is Computadora))
-            //{
-            //    Computadora comp = item as Computadora;
-
-            //    if (comp is null) continue;
-
-            //    comp.PrintReceivedBits();
-            //}
-
-
-
-
-            TestMethod(); 
+            RunAplication();
 
         }
 
 
         public static void TestMethod ()
         {
+            EnviromentActions.LimpiarDirectoriodeSalida();
+
             Switch @switch = new Switch("sw",4,0);
 
             Computadora computadora1 = new Computadora("pc1",1);
@@ -93,8 +80,6 @@ namespace ProyecotdeRedes
             Puerto ps1 = @switch.DameElPuerto(0);
             Puerto ps2 = @switch.DameElPuerto(1);
 
-            //pc.EstaConectadoAOtroDispositivo = true;
-            //ps1.EstaConectadoAOtroDispositivo = true;
 
             EnviromentActions.ConnectPortsByCable(cable1, pc1, ps1);
             EnviromentActions.ConnectPortsByCable(cable2, pc2, ps2);
@@ -104,12 +89,19 @@ namespace ProyecotdeRedes
 
             while(current_time < Program.tiempo_maximo)
             {
-                SendPackages(computadora1);
+                SendPackages(computadora1 , "A5B4", "A6F43400FFB34E", 1);
+
+
+                SendPackages(computadora2, "A5B3", "A2B4D21C391ABC9F" , 4001); 
+
 
                 computadora1.UpdateSendingBit();
+                computadora2.UpdateSendingBit(); 
                 @switch.UpdateSendingBit();
 
+
                 computadora1.updateDataReceived();
+                computadora2.updateDataReceived();
                 @switch.updateDataReceived();
 
                 current_time++; 
@@ -117,11 +109,21 @@ namespace ProyecotdeRedes
         }
 
 
-        private static void SendPackages(Computadora comp)
+        private static void SendPackages(Computadora comp , string dirMac , string data , uint time)
         {
-            if (current_time == 1)
+            //if (current_time == 1)
+            //{
+            //    comp.send_frame("A5B4", "A6F43400FFB34E");
+            //}
+
+            //if (current_time == 4001)
+            //{
+            //    comp.send_frame("A51B", "A2B4D21C391ABC9F");
+            //}
+
+            if (current_time == time)
             {
-                comp.send_frame("A5B4", "A6F43400FFB34E");
+                comp.send_frame(dirMac, data);
             }
         }
 
@@ -155,48 +157,28 @@ namespace ProyecotdeRedes
             while (current_time < tiempo_maximo)
             {
 
-                Console.WriteLine($"CURRENT TIME : {Program.current_time} mili-second");
+                //Console.WriteLine($"CURRENT TIME : {Program.current_time} mili-second");
                
 
                 //Ejecutar las instrucciones que corresponden a ejecutarse en el 
-                //mili-segundo actual que están en la cola de instrucciones ; 
+                //mili-segundo actual que están en la cola de instrucciones
                 foreach (var item in ProximasInstruccionesEjecutar(current_time))
                 {
                     EjecutarInstruccion(item);
                 }
-              
-                //Actualizar el bit de salida de cada computadora para después 
-                //enviar el bit que esta en la salida a cada uno de los 
-                //Dispositivos a los que esta conectado la Computadora
-                foreach (var item in dispositivos.Where(e => e is Computadora))
-                {
-                    Computadora comp = item as Computadora; 
-                    comp.EnviarInformacionALasDemasComputadoras(); 
-                }
 
-                //verifica las entrada por cada dispositivo y chequea su hubo 
-                //una colisión, y escribe en la salida (en su txt correspondiente )
-                //la salida que este dispositivo tiene. 
+
                 foreach (var item in dispositivos)
                 {
-                    item.ProcesarInformacionDeSalidaYDeEntrada();
+                    item.UpdateSendingBit();
                     
-                    //----------------esto es un prueba -----------------------
-
-                    Computadora comp =  item as Computadora; 
-                    if(comp != null)
-                    {
-                        comp.updateDataReceived();
-                    }
-
-                    //--------------------------------------------------------
-
-                    //item.LimpiarLosParametrosDeEntrada();
-
                 }
 
-                //Aumentar el contador de mili-segundos para pasar a procesar 
-                //el próximo mili-segundo para ejecutar las instrucciones
+                foreach (var item in dispositivos)
+                {
+                    item.updateDataReceived();
+                }
+                
                 current_time++;                
             }
         }
@@ -330,9 +312,6 @@ namespace ProyecotdeRedes
                                                       puerto1: p1, 
                                                       puerto2: p2);
                 
-
-                p1.EstaConectadoAOtroDispositivo = true;
-                p2.EstaConectadoAOtroDispositivo = true; 
 
             }
 

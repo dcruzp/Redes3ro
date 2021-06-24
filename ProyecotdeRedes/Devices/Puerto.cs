@@ -1,4 +1,5 @@
-﻿using ProyecotdeRedes.Component;
+﻿using ProyecotdeRedes.Auxiliaries;
+using ProyecotdeRedes.Component;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,12 +24,6 @@ namespace ProyecotdeRedes.Devices
         int numero_puerto;
 
 
-        /// <summary>
-        /// Este es el nombre del puerto al que esta conectado 
-        /// </summary>
-        //string puertoalqueestaconectado;
-
-
 
         /// <summary>
         /// Esto es para poner los bit de salida que hay en esta computadora 
@@ -39,7 +34,7 @@ namespace ProyecotdeRedes.Devices
         /// <summary>
         /// Esto es para representar los bits de entrada por el puerto 
         /// </summary>
-        Queue<Bit> queueinput;
+        //Queue<Bit> queueinput;
 
 
         /// <summary>
@@ -94,7 +89,15 @@ namespace ProyecotdeRedes.Devices
         public string DirMac
         {
             get => this._dirMac;
-            set => this._dirMac = value; 
+        }
+
+        public bool PutMacDirection (string dirMac)
+        {
+            if (!CheckMetods.CheckIsOkDirMac(dirMac))
+                return false;
+
+            this._dirMac = dirMac;
+            return true; 
         }
 
         public void DesconectarElPuerto()
@@ -123,7 +126,7 @@ namespace ProyecotdeRedes.Devices
             this.numero_puerto = numero_puerto;
             this._cable = null;
             this._dispPertenece = dispositivo;
-            this.queueinput = new Queue<Bit>();
+            //this.queueinput = new Queue<Bit>();
             this.queueoutput = new Queue<Bit>();
             this._history = new List<OneBitPackage>(); 
 
@@ -226,14 +229,7 @@ namespace ProyecotdeRedes.Devices
         }
 
 
-        /// <summary>
-        /// Esto actualiza y pone en las entradas el bit que se recibió
-        /// </summary>
-        /// <param name="bit"></param>
-        public void RecibirUnBit (Bit bit)
-        {
-            this.entradas[(int)bit] = true; 
-        }
+       
 
 
         private int time_sending = 0;
@@ -246,7 +242,7 @@ namespace ProyecotdeRedes.Devices
 
         private Bit AuxInBit = Bit.none;
 
-        public void UpdateInBit ()
+        public void UpdateInBit()
         {
             this.InBit = this.GiveMeInBit();
 
@@ -281,6 +277,8 @@ namespace ProyecotdeRedes.Devices
                     Action.Received,
                     this.InBit);
 
+                
+
                 this._history.Add(bitreceived);
 
                 time_received_byte++; 
@@ -290,15 +288,16 @@ namespace ProyecotdeRedes.Devices
 
                     OneBytePackage oneBitPackage = BuildBytePackage();
 
+                    
+                    
+                    Console.WriteLine($"{this.id_puerto} received the byte: {oneBitPackage.ToString()} in time: {Program.current_time}");
+                    time_received_byte = 0;
+
                     this.DispPertenece.BytesReceives.Add(oneBitPackage);
                     this.DispPertenece.ProcessDataReceived();
-                    
-                    //Console.WriteLine($"Recibio un byte en el milisegundo {Program.current_time}");
-                    time_received_byte = 0; 
                 }
 
-                Console.WriteLine(this.DispPertenece.Name);
-                Console.WriteLine(bitreceived.ToString());               
+                          
 
                 this.time_received = 0;
                 this.AuxInBit = Bit.none;
@@ -330,7 +329,7 @@ namespace ProyecotdeRedes.Devices
         public void UpdateOutBit()
         {
 
-            if (this.queueoutput.Count == 0)
+            if (this.queueoutput.Count == 0 || this._cable==null)
             {
                 this.OutBit = Bit.none;
             }
@@ -358,8 +357,9 @@ namespace ProyecotdeRedes.Devices
                                                                     bit: this.OutBit,
                                                                     actionResult: ActionResult.Ok);
 
+                    string salida = this.id_puerto + " ---> " +  oneBitPackage.ToString(); 
 
-                    Console.WriteLine(oneBitPackage.ToString());
+                    Console.WriteLine(salida);
 
                     _history.Add(oneBitPackage);           
                     

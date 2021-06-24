@@ -22,6 +22,77 @@ namespace ProyecotdeRedes.Auxiliaries
             return lenghtData;
         }
 
+        public static string FromByteDataToHexadecimal (List<Bit> data)
+        {
+            Queue<Bit> queue = new Queue<Bit>(data);
+
+            StringBuilder stringBuilder = new StringBuilder(data.Count / 4);
+
+            StringBuilder stringBuilderAux = new StringBuilder(4);
+
+            while (queue.Count > 0) 
+            {
+                stringBuilderAux = new StringBuilder(4);
+
+                int count = 4; 
+
+                while (count -- > 0 && queue.Count>0)
+                {
+                    Bit bit = queue.Dequeue();
+                    stringBuilderAux.Append(((int)bit).ToString()); 
+                }
+
+                if (stringBuilderAux.Length != 4) throw new InvalidCastException($"No se puede transformar de " +
+                       $"Binario a Hexadecimal porque no hay una 4 bits para determinar un digito en Hexadecimal");
+
+                stringBuilder.Append(FromBinaryCadenaToHexadecimalDigit(stringBuilderAux
+                    .ToString()));
+            }
+
+            return stringBuilder.ToString(); 
+        }
+
+        public static char FromBinaryCadenaToHexadecimalDigit(string str)
+        {
+            switch (str)
+            {
+                case "0000":
+                    return '0';                
+                case "0001":
+                    return '1';
+                case "0010":
+                    return '2';
+                case "0011":
+                    return '3';
+                case "0100":
+                    return '4';
+                case "0101":
+                    return '5';
+                case "0110":
+                    return '6';
+                case "0111":
+                    return '7';
+                case "1000":
+                    return '8';
+                case "1001":
+                    return '9';
+                case "1010":
+                    return 'A';
+                case "1011":
+                    return 'B';
+                case "1100":
+                    return 'C';
+                case "1101":
+                    return 'D';
+                case "1110":
+                    return 'E';
+                case "1111":
+                    return 'F';
+                default:
+                    throw new InvalidCastException("Can't  convert"); 
+            }
+
+        }
 
 
         public static Bit[] convertFromHexStrToBitArray(string hexString)
