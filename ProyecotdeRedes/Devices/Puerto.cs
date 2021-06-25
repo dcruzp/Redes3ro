@@ -100,14 +100,14 @@ namespace ProyecotdeRedes.Devices
             return true; 
         }
 
-        public void DesconectarElPuerto()
-        {
-            //this.puertoalqueestaconectado = null;
-            this._outBit = Bit.none;
-            this.estaConectado = false;
+        //public void DesconectarElPuerto()
+        //{
+        //    //this.puertoalqueestaconectado = null;
+        //    this._outBit = Bit.none;
+        //    this.estaConectado = false;
 
-            LimpiarEntradas(); 
-        }
+        //    LimpiarEntradas(); 
+        //}
 
         public int NumeroPuerto
         {
@@ -126,7 +126,6 @@ namespace ProyecotdeRedes.Devices
             this.numero_puerto = numero_puerto;
             this._cable = null;
             this._dispPertenece = dispositivo;
-            //this.queueinput = new Queue<Bit>();
             this.queueoutput = new Queue<Bit>();
             this._history = new List<OneBitPackage>(); 
 
@@ -228,11 +227,15 @@ namespace ProyecotdeRedes.Devices
                 this.entradas[i] = false; 
         }
 
-
-       
-
-
+        /// <summary>
+        /// el time_sending me representa el tiempo en milisegundos que 
+        /// se ha estado transmitiendo el bit que esta al principio de la 
+        /// cola y que debe permanecer transmitiendose una cantidad de milisegundos 
+        /// igual al signal_time para que sea considerado como enviado 
+        /// </summary>
         private int time_sending = 0;
+
+
 
         private List<OneBitPackage> _history;
 
@@ -242,6 +245,11 @@ namespace ProyecotdeRedes.Devices
 
         private Bit AuxInBit = Bit.none;
 
+
+        /// <summary>
+        /// Esto es para actualizar y hacer todo las acciones 
+        /// para procesar los datos que se tienen hasta el momento 
+        /// </summary>
         public void UpdateInBit()
         {
             this.InBit = this.GiveMeInBit();
@@ -296,8 +304,7 @@ namespace ProyecotdeRedes.Devices
                     this.DispPertenece.BytesReceives.Add(oneBitPackage);
                     this.DispPertenece.ProcessDataReceived();
                 }
-
-                          
+                                          
 
                 this.time_received = 0;
                 this.AuxInBit = Bit.none;
@@ -305,6 +312,13 @@ namespace ProyecotdeRedes.Devices
         }
 
 
+        /// <summary>
+        /// Est oes para contruir una instancia de OneBytePackage con los 
+        /// ultimos 8 bits recibidos por este puerto. Como el Byte es contruido 
+        /// en el instant en que se llama a la funcion entonces es asume que el 
+        /// tiempo recepcion del Byte es el momento actual cuando se llama al metodo
+        /// </summary>
+        /// <returns></returns>
         private OneBytePackage BuildBytePackage ()
         {
             Bit[] bits = this._history.TakeLast(8).Select(x => x.Bit).ToArray();

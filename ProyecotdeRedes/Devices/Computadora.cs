@@ -15,7 +15,7 @@ namespace ProyecotdeRedes
         /// por enviar aun. Si la cola esta vacía es que no quedan 
         /// bit por enviar. 
         /// </summary>
-        Queue<Bit> porenviar;
+        //Queue<Bit> porenviar;
         
 
         
@@ -41,7 +41,7 @@ namespace ProyecotdeRedes
 
         public Computadora(string name ,int indice) : base(name ,1, indice)
         {           
-            this.porenviar = new Queue<Bit>();
+            //this.porenviar = new Queue<Bit>();
             this.direccionMax = null;
         }
 
@@ -63,18 +63,17 @@ namespace ProyecotdeRedes
             }
         }
 
-        /// <summary>
-        /// Este método se llama cuando se detecta una colisión 
-        /// Esto es para darle un tiempo random a la computadora 
-        /// para que espere anted de volver a enviar un bit
-        /// </summary>
-        public void Actualizar()
-        {
-            this.tiempoesperandoparavolveraenviar = (uint)new Random().Next(5,50);
-            Console.WriteLine($"{this.name}  va a esperar {this.tiempoesperandoparavolveraenviar} para volver a enviar un dato");
-           
-        }
         
+        /// <summary>
+        /// send_frame procesa todos los datos necesarios 
+        /// para armar el contenido de un frame yenviarlos 
+        /// por el puerto.  
+        /// </summary>
+        /// <param name="mac">Este parametro es la data de la 
+        /// direccion mac en formato hexadecimal. Es la direccion 
+        /// mac de la computadora a la que se le va a enviar la data</param>
+        /// <param name="data">Este parametro es la data que se va a 
+        /// enviar en el frame, en formato hexadecimal </param>
         public void send_frame (string mac , string data)
         {
             var packagetosend = new List<Bit>();
@@ -111,141 +110,15 @@ namespace ProyecotdeRedes
         /// send para el envío de un paquete de bits
         /// </summary>
         /// <param name="paquete"></param>
-        public void send(List<Bit> paquete)
+        public void send(List<Bit> pakage)
         {
-            foreach (var item in paquete)
+            foreach (var item in this.puertos)
             {
-                porenviar.Enqueue(item);
+                item.SendData(pakage); 
             }
         }
 
 
-        /// <summary>
-        /// Este método se llama inicialmente antes de cualquier otro 
-        /// llamado en un mili segundo , y lo que hace básicamente es determinar 
-        /// que bit se va a enviar y Enviárselo a las demás computadoras que 
-        /// están conectadas en la red que se encuentra la de esta instancia
-        /// </summary>
-        /// <returns></returns>
-        public bool EnviarInformacionALasDemasComputadoras()
-        {
-            //if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
-            //    return false; 
-            
-            //ActualizarElBitDeSalida();
-            EnviarElBitQueHayEnLaSalidaALasDemasComputadoras();
-
-            return true; 
-        }
-
-
-        
-
-
-        /// <summary>
-        /// Este método se llama después de haber llamado al método
-        ///  ActualizarElBitDeSalida() para que este pueda se enviado 
-        ///  con el procedimiento de este método a las demás computadoras 
-        ///  que están conectadas a la que representa esta instancia, 
-        ///  (aquí lo que se usa es un bfs para enviar el bit a cada computadora)
-        /// </summary>
-        public void EnviarElBitQueHayEnLaSalidaALasDemasComputadoras()
-        {
-            Queue<Dispositivo> queue = new Queue<Dispositivo>();
-            bool[] mask = new bool[Program.dispositivos.Count];
-            mask[this.indice]= true; 
-            queue.Enqueue(this);
-
-            Dispositivo current; 
-
-            while(queue.Count>0)
-            {
-                current = queue.Dequeue();
-
-                foreach (var item in current.PuertosConectados)
-                {
-                    Dispositivo dispconectado = item.giveMeDisposotivoConectado;
-                    if (mask[dispconectado.Indice]) continue;
-
-                    int puertoporelqueestaconectado = item.NumeroPuertoAlQueEstaConectado;
-                   
-                    //dispconectado.recibirUnBit(puertoporelqueestaconectado, this.bitsalida); 
-                    
-                    mask[dispconectado.Indice] = true;
-                    queue.Enqueue(dispconectado); 
-                }
-            }
-        }
-
-        /// <summary>
-        /// Este método es llamado para una vez que se establecieron las
-        /// salidas y entradas de datos a esta computadora puedan ser 
-        /// procesados estos datos y determinar si hubo una colisión 
-        /// y escribir en la salida del dispositivo los datos 
-        /// de salida  correspondiente a esta computadora.
-        /// </summary>
-        public override void ProcesarInformacionDeSalidaYDeEntrada()
-        {
-            if (this.puertos[0] == null || !this.puertos[0].EstaConectadoAOtroDispositivo)
-                return;
-
-            bool hubocolision = HuboUnaColision();
-
-            
-            //if (this.BitdeSalida != Bit.none && hubocolision)
-            //{
-            //    //this._sendAndReceived.Enqueue(new OneBitPackage(
-            //    //                                                 Program.current_time,
-            //    //                                                 Action.Send,
-            //    //                                                 this.BitdeSalida,
-            //    //                                                 actionResult: ActionResult.Collision));
-                
-            //    Actualizar();
-            //    return; 
-            //}
-            //else if (this.BitdeSalida != Bit.none)
-            //{
-            //    //this._sendAndReceived.Enqueue(new OneBitPackage(
-            //    //                                                 Program.current_time,
-            //    //                                                 Action.Send,
-            //    //                                                 this.BitdeSalida,
-            //    //                                                 ActionResult.Ok));
-
-                
-            //}
-            
-            //if (this.BitdeEntrada != Bit.none)
-            //{
-            //    //this._sendAndReceived.Enqueue(new OneBitPackage (
-            //    //                                                Program.current_time,
-            //    //                                                Action.Received);
-            //}
-
-        }
-
-
-        /// <summary>
-        /// Esto es para imprimir los bit que recibió
-        /// el dispositivo
-        /// </summary>
-        //public void PrintReceivedBits()
-        //{
-        //    StringBuilder stringBuilder = new StringBuilder(); 
-            
-        //    //Console.Write($"{this.name.ToUpper()}\n");
-
-        //    foreach (var item in _sendAndReceived)
-        //    {
-        //        stringBuilder.Append(item.ToString());
-        //        stringBuilder.Append(Environment.NewLine); 
-        //        //Console.WriteLine(item.ToString());
-        //    }
-
-        //    EscribirEnLaSalida(stringBuilder.ToString());
-        //    //Console.WriteLine(stringBuilder.ToString());
-
-        //    //Console.WriteLine();
-        //}
 
         public override void ProcessDataReceived()
         {

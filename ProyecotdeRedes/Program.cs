@@ -39,8 +39,6 @@ namespace ProyecotdeRedes
         public static int cantidadmaximadepuertosdeunhub = 8; 
 
 
-
-
         /// <summary>
         /// Cola de instrucciones que son cargadas al principio del programa 
         /// para después ser ejecutadas según llegue su momento 
@@ -55,78 +53,11 @@ namespace ProyecotdeRedes
         public static List<Dispositivo> dispositivos; 
         
         
-        
         static void Main(string[] args)
         {
             RunAplication();
 
         }
-
-
-        public static void TestMethod ()
-        {
-            EnviromentActions.LimpiarDirectoriodeSalida();
-
-            Switch @switch = new Switch("sw",4,0);
-
-            Computadora computadora1 = new Computadora("pc1",1);
-            Computadora computadora2 = new Computadora("pc2", 2);
-
-            Cable cable1 = new Cable();
-            Cable cable2 = new Cable(); 
-
-            Puerto pc1 = computadora1.DameElPuerto(0);
-            Puerto pc2 = computadora2.DameElPuerto(0);
-            Puerto ps1 = @switch.DameElPuerto(0);
-            Puerto ps2 = @switch.DameElPuerto(1);
-
-
-            EnviromentActions.ConnectPortsByCable(cable1, pc1, ps1);
-            EnviromentActions.ConnectPortsByCable(cable2, pc2, ps2);
-
-            computadora1.PutMacDirection("A5B3");
-            computadora2.PutMacDirection("A5B4");
-
-            while(current_time < Program.tiempo_maximo)
-            {
-                SendPackages(computadora1 , "A5B4", "A6F43400FFB34E", 1);
-
-
-                SendPackages(computadora2, "A5B3", "A2B4D21C391ABC9F" , 4001); 
-
-
-                computadora1.UpdateSendingBit();
-                computadora2.UpdateSendingBit(); 
-                @switch.UpdateSendingBit();
-
-
-                computadora1.updateDataReceived();
-                computadora2.updateDataReceived();
-                @switch.updateDataReceived();
-
-                current_time++; 
-            }
-        }
-
-
-        private static void SendPackages(Computadora comp , string dirMac , string data , uint time)
-        {
-            //if (current_time == 1)
-            //{
-            //    comp.send_frame("A5B4", "A6F43400FFB34E");
-            //}
-
-            //if (current_time == 4001)
-            //{
-            //    comp.send_frame("A51B", "A2B4D21C391ABC9F");
-            //}
-
-            if (current_time == time)
-            {
-                comp.send_frame(dirMac, data);
-            }
-        }
-
 
 
         public static void RunAplication()
@@ -167,19 +98,24 @@ namespace ProyecotdeRedes
                     EjecutarInstruccion(item);
                 }
 
-
+                //Actualizar el bit que hay en la salida de cada uno 
+                //de los puertos de todos los dispositivos que existen 
                 foreach (var item in dispositivos)
                 {
                     item.UpdateSendingBit();
                     
                 }
 
+
+                //Actualizar la entrada y procesar la informacion por cada 
+                //uno de los puertos de cada uno de los dispositivos que existen 
                 foreach (var item in dispositivos)
                 {
                     item.updateDataReceived();
                 }
                 
-                current_time++;                
+                //Aumentar el tiempo global en 1 
+                current_time = current_time + 1;                
             }
         }
 
@@ -335,7 +271,7 @@ namespace ProyecotdeRedes
                 Dispositivo[] comp = disp.ToArray(); 
                 if(comp.Length != 1)
                 {
-                    throw new Exception("no se encontró el dispositivo "); 
+                    throw new Exception("no se encontró el dispositivo"); 
                 }
 
                 Computadora computadora = comp[0] as Computadora;
@@ -373,9 +309,8 @@ namespace ProyecotdeRedes
                 Puerto p1 = dispositivo1.DameElPuerto(numeropuerto1);
                 Puerto p2 = dispositivo2.DameElPuerto(numeropuerto2);
 
-                p1.DesconectarElPuerto();
-                p2.DesconectarElPuerto(); 
-                
+                p1.Cable = null;
+                p2.Cable = null;                               
             }
             
             else if (tipoinstruccion  ==  TipodeInstruccion.mac)
@@ -438,8 +373,7 @@ namespace ProyecotdeRedes
                     throw new InvalidCastException($"La instruccion send_frame '{dataToSend}' no contiene los datos a enviar en formato hexadecimal");
                 }
 
-                comp.send_frame(dirMacToSend, dataToSend);
-                  
+                comp.send_frame(dirMacToSend, dataToSend);      
             }
         }
 

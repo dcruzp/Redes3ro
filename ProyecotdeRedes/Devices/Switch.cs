@@ -10,14 +10,11 @@ namespace ProyecotdeRedes
 {
     class Switch:Dispositivo
     {
-        string[] direcionesMac;
-
         public Switch(string name, int cantidaddepuertos, int indice) : base(name, cantidaddepuertos, indice)
         {
             this.name = name;
             this.cantidaddepuertos = cantidaddepuertos;
             this.indice = indice;
-            this.direcionesMac = new string[cantidaddepuertos]; 
         }
 
         public override void ProcessDataReceived()
@@ -29,9 +26,7 @@ namespace ProyecotdeRedes
                 _history.Add(currentBuildInFrame);
 
                 string port =  BytesReceives[BytesReceives.Count - 1].portreceived;
-
                 
-
                 Puerto ptReceived = this.puertos[int.Parse(port.Split('_')[1])];
 
                 string dirMacFromDataReceived = AuxiliaryFunctions.FromByteDataToHexadecimal(currentBuildInFrame.MacOut);
