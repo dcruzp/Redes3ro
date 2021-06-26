@@ -12,17 +12,25 @@ namespace ProyecotdeRedes.Component
         Action _action;
         Bit _bit;
         ActionResult _actionResult;
+        string _port;
 
-        public OneBitPackage (
-            uint time, 
-            Action action, 
-            Bit bit , 
-            ActionResult actionResult = ActionResult.None )
+        public OneBitPackage(
+            uint time,
+            Action action,
+            Bit bit,
+            ActionResult actionResult = ActionResult.None,
+            string port = "")
         {
             _time = time;
             _action = action;
             _bit = bit;
-            _actionResult = actionResult; 
+            _actionResult = actionResult;
+            _port = port; 
+        }
+
+        public uint Time
+        {
+            get => this._time; 
         }
 
         public Bit Bit
@@ -33,6 +41,8 @@ namespace ProyecotdeRedes.Component
         {
             StringBuilder stringBuilder = new StringBuilder();
 
+            stringBuilder.Append(this._port);
+            stringBuilder.Append(" "); 
             stringBuilder.Append(this._time.ToString());
             stringBuilder.Append(" "); 
             stringBuilder.Append(this._action.ToString());

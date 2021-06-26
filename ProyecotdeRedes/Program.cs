@@ -57,6 +57,7 @@ namespace ProyecotdeRedes
         {
             RunAplication();
 
+            
         }
 
 
@@ -117,6 +118,12 @@ namespace ProyecotdeRedes
                 //Aumentar el tiempo global en 1 
                 current_time = current_time + 1;                
             }
+
+
+            foreach (var item in dispositivos)
+            {
+                item.WriteDataInFile();
+            }
         }
 
 
@@ -135,6 +142,8 @@ namespace ProyecotdeRedes
 
             if (instruccionpartida.Length < 1)
                 EnviromentActions.LanzarExepciondeCasteo(instruccion);
+
+            if (instruccionpartida[0][0] == '#') return; 
 
             uint tiempodelainstruccion;
 
@@ -239,8 +248,8 @@ namespace ProyecotdeRedes
 
               
 
-                Puerto p1 = disp1.DameElPuerto(numeroport1);
-                Puerto p2 = disp2.DameElPuerto(numeroport2);
+                Port p1 = disp1.DameElPuerto(numeroport1);
+                Port p2 = disp2.DameElPuerto(numeroport2);
 
                 Cable cable = new Cable();
 
@@ -306,8 +315,8 @@ namespace ProyecotdeRedes
                 int numeropuerto1 = int.Parse(port1.Split('_')[1]) -1;
                 int numeropuerto2 = int.Parse(port2.Split('_')[1]) -1;
 
-                Puerto p1 = dispositivo1.DameElPuerto(numeropuerto1);
-                Puerto p2 = dispositivo2.DameElPuerto(numeropuerto2);
+                Port p1 = dispositivo1.DameElPuerto(numeropuerto1);
+                Port p2 = dispositivo2.DameElPuerto(numeropuerto2);
 
                 p1.Cable = null;
                 p2.Cable = null;                               

@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using ProyecotdeRedes.Auxiliaries;
+﻿using ProyecotdeRedes.Auxiliaries;
 using ProyecotdeRedes.Component;
 using ProyecotdeRedes.Devices;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ProyecotdeRedes
 {
@@ -158,7 +158,7 @@ namespace ProyecotdeRedes
             if (File.Exists(directoriodelfichero))
             {
                 IEnumerable<Instruccion> lines = from inst in File.ReadLines(directoriodelfichero)
-                                                 where !string.IsNullOrEmpty(inst) 
+                                                 where !string.IsNullOrEmpty(inst) && inst[0] != '#'
                                                  orderby int.Parse(inst.Split(' ')[0]) ascending
                                                  select new Instruccion(inst);
 
@@ -171,13 +171,13 @@ namespace ProyecotdeRedes
         }
 
 
-        public static void ConnectPortsByCable(Cable cable , Puerto puerto1 , Puerto puerto2)
+        public static void ConnectPortsByCable(Cable cable, Port puerto1, Port puerto2)
         {
             cable.puerto1 = puerto1;
             cable.puerto2 = puerto2;
 
             puerto1.Cable = cable;
-            puerto2.Cable = cable; 
+            puerto2.Cable = cable;
 
             puerto1.ConnectCableToPort(cable);
             puerto2.ConnectCableToPort(cable);

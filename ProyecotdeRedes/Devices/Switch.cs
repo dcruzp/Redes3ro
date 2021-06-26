@@ -27,7 +27,7 @@ namespace ProyecotdeRedes
 
                 string port =  BytesReceives[BytesReceives.Count - 1].portreceived;
                 
-                Puerto ptReceived = this.puertos[int.Parse(port.Split('_')[1])];
+                Port ptReceived = this.puertos[int.Parse(port.Split('_')[1])];
 
                 string dirMacFromDataReceived = AuxiliaryFunctions.FromByteDataToHexadecimal(currentBuildInFrame.MacOut);
 
@@ -35,7 +35,7 @@ namespace ProyecotdeRedes
 
                 string dirMacHostIn = AuxiliaryFunctions.FromByteDataToHexadecimal(currentBuildInFrame.MacIn); 
 
-                Puerto ptToSend = GimePortWithDirMac(dirMacHostIn);
+                Port ptToSend = GimePortWithDirMac(dirMacHostIn);
 
                 if (ptToSend == null || dirMacHostIn == "FFFF") 
                 {
@@ -57,7 +57,7 @@ namespace ProyecotdeRedes
         }
 
 
-        public Puerto GimePortWithDirMac (string dirMac)
+        public Port GimePortWithDirMac (string dirMac)
         {
             foreach (var item in this.puertos)
             {

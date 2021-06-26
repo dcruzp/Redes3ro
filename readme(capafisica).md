@@ -14,21 +14,15 @@
 El Programa tiene varios parámetros fundamentales que esta en la clase *Program* como son el 
 *signal_time* y el tiempo máximo que va a correr el programa (para el programa la interpretación del tiempo es cada vez que pasa un 
 ciclo del programa *ciclo principal del programa* es como si pasara 1 mili-segundo) Entonces los Host están representados por la 
-clase Computadora , que esta en un fichero aparte de la solución , los Hubs por la clase Hub.
+clase Computadora , que esta en un fichero aparte de la solución , los Hubs por la clase Hub y los Switch por la clase Switch.cs. 
 
-Entonces en el ciclo principal , se recorren primero todos los dispositivos que son computadoras que hay en el momento actual creados , 
-para actualiza el bit que ellos van a emitir a otras computadoras. En cuanto termina de determinar 
-que Bit es el que se le va a enviar a las demás computadoras , se les envía y en estas queda registrado que 
-se le envió un bit que corresponde al bit de salida de la computadora que envía. 
+Entonces basicamente hay dos momentos para el manejo de la inormacion que se 
+transmite de dsipositivo a dispositivo. El primero se determina que bit es 
+el que va a la salida de cada puerto. Esto es que cada dispositivo determian que 
+bit se va a transmitir por cada puerto. 
 
-Después se recorren todos los dispositivos para chequear si hubo una colisión 
-y tomar las determinaciones para escribir en la salida que bit recibió el dispositivo. 
-
-#### Que sucede si hay una colisión 
-Si hay una colisión, el Host va a esperar de 5 a 50 mili-segundos (una cantidad random de mili-segundos entre 5 y 50) 
-para volver a enviar información. Si no se pudo enviar un bit completo (es decir que el bit no se estuvo transmitiendo por el canal la cantidad de mili-segundos 
-que se especifican en el Signal_time) entonces el bit no se da como enviado y cuando la computadora vuelva a tratar de enviar información va a empezar por ese bit 
-tratando de mantenerlo transmitiéndose el tiempo que indica el signal_time.   
+Y el segundo momento se recogen los bit que cada dispositivo recibe y cada uno de 
+los dispositivos de la red determian que tratamiento le da a esos dispositivos. 
 
 
 #### Configuración 
@@ -45,3 +39,5 @@ En el fichero *config.txt* se pueden ajustar varios parámetros para corres el p
 Aquí voy a dejar el link del repositorio donde se encuentra el repositorio donde esta el proyecto
 
 - [Proyecto de Redes](https://github.com/dcruzp/Redes3ro)
+
+

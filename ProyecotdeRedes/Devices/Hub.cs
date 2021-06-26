@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace ProyecotdeRedes
@@ -33,8 +34,26 @@ namespace ProyecotdeRedes
         {
             if (numerodepuertos < Program.cantidadminimadepuertosdeunhub || numerodepuertos > Program.cantidadmaximadepuertosdeunhub)
             {
-                throw new IndexOutOfRangeException("No se puede tener un hub con menos de 4 puertos o mas de 8 "); 
+                throw new IndexOutOfRangeException($"No se puede tener un hub con menos de {Program.cantidadminimadepuertosdeunhub} " +
+                    $"puertos o mas de {Program.cantidadmaximadepuertosdeunhub} "); 
             }            
+        }
+
+        public override void ProcessDataReceived()
+        {
+            //base.ProcessDataReceived();
+
+            var datareceived = this.BytesReceives[this.BytesReceives.Count - 1];
+
+            var listBits =  datareceived.Byte.GiveMeBits.ToList();
+
+            foreach (var item in this.puertos)
+            {
+                if (item.PortNumber == int.Parse(datareceived.portreceived.Split('_')[1])) continue;
+
+                item.SendData(listBits); 
+            }
+
         }
     }
 }

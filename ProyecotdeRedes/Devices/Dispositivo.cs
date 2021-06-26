@@ -6,6 +6,7 @@ using ProyecotdeRedes.Component;
 using ProyecotdeRedes.Devices;
 using Action = ProyecotdeRedes.Component.Action;
 using Byte = ProyecotdeRedes.Component.Byte;
+using System.Linq;
 
 namespace ProyecotdeRedes
 {
@@ -15,7 +16,7 @@ namespace ProyecotdeRedes
         /// Esto es para representar los puertos que 
         /// que tiene el dispositivo.
         /// </summary>
-        protected Puerto[] puertos; 
+        protected Port[] puertos; 
 
 
         /// <summary>
@@ -51,16 +52,6 @@ namespace ProyecotdeRedes
         protected int cantidaddepuertos;
 
 
-        Bit bitReceived;
-
-
-        uint timeReceivedTheInputBit;
-
-
-        /// <summary>
-        /// Datos que se han recibido 
-        /// </summary>
-        //protected Queue<OneBitPackage> _sendAndReceived;
 
 
         /// <summary>
@@ -79,18 +70,13 @@ namespace ProyecotdeRedes
             this.indice = indice;
             this.cantidaddepuertos = cantidaddepuertos;
 
-            this.bitReceived = Bit.none;
-
-            this.puertos = new Puerto[cantidaddepuertos];
+            this.puertos = new Port[cantidaddepuertos];
 
             for (int i = 0; i < cantidaddepuertos; i++)
             {
-                this.puertos[i] = new Puerto(this.name + $"_{i}" , i , this); 
+                this.puertos[i] = new Port(this.name + $"_{i}" , i , this); 
             }
 
-            this.timeReceivedTheInputBit = 0;
-
-            //this._sendAndReceived = new Queue<OneBitPackage>();
 
             this.BytesReceives = new List<OneBytePackage>();
 
@@ -133,7 +119,7 @@ namespace ProyecotdeRedes
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public Puerto DameElPuerto(int id)
+        public Port DameElPuerto(int id)
         {
             if (id >= this.cantidaddepuertos || id < 0) throw new IndexOutOfRangeException("El dispositivo no tiene el puerto que se le especifica");
 
@@ -141,20 +127,7 @@ namespace ProyecotdeRedes
         }
 
 
-        /// <summary>
-        /// Esto retorna todos los puertos (en orden ) que 
-        /// tienen conectado algún dispositivo
-        /// </summary>
-        public IEnumerable<Puerto> PuertosConectados
-        {
-            get
-            {
-                foreach (var item in this.puertos)
-                    if (item.EstaConectadoAOtroDispositivo)
-                        yield return item;
-            }
-        }
-
+        
 
         /// <summary>
         /// Esto crea un fichero si no existe , y si existe lo abre y 
@@ -194,33 +167,7 @@ namespace ProyecotdeRedes
         
 
 
-        /// <summary>
-        /// Esto detecta si en los bits de entradas hubo mas de 
-        /// un bit que fue recibido , es decir se recibieron 
-        /// bit diferentes de algunas computadoras
-        /// </summary>
-        /// <returns></returns>
-        public bool HuboUnaColision()
-        {
-            this.bitentrada = Bit.none;
-            bool cero = false , uno = false;
-
-            foreach (var item in this.PuertosConectados)
-            {
-                if (item.Entradas[(int)Bit.cero]) cero = true;
-                if (item.Entradas[(int)Bit.uno]) uno = true; 
-            }
-
-
-            if (uno && cero) return true;
-            else if (uno) this.bitentrada = Bit.uno;
-            else if (cero) this.bitentrada = Bit.cero;
-
-            //if (this is Computadora && bitentrada!= Bit.none /*&&  bitentrada != bitsalida*/) return true; 
-            //else return false; 
-            return false; 
-        }
-
+       
         /// <summary>
         /// Este método pone el bit de salida que le corresponde
         /// es ese mili segundo estar en la salida . Este método se 
@@ -253,7 +200,6 @@ namespace ProyecotdeRedes
         public List<DataFramePackage> _history { get; set; }
 
 
-
         public virtual void ProcessDataReceived()
         {
             if (currentBuildInFrame == null)
@@ -276,81 +222,31 @@ namespace ProyecotdeRedes
             //}
         }
 
-        /// <summary>
-        /// Esto chequea si hubo colisión y escribe en las salidas los 
-        /// valores correspondientes 
-        /// </summary>
-        public virtual void ProcesarInformacionDeSalidaYDeEntrada()
+        public void WriteDataInFile ()
         {
-            bool hubocolision = HuboUnaColision();
-
-            if (hubocolision || this.bitentrada == Bit.none)  return;
-            
-
-            StringBuilder salida = new StringBuilder(); 
-
-            for (int i = 0; i < this.cantidaddepuertos; i++)
-            {
-                if (this.puertos[i] == null || !this.puertos[i].EstaConectadoAOtroDispositivo) continue; 
-
-                if (this.puertos[i].Entradas[(int)Bit.cero] || this.puertos[i].Entradas[(int)Bit.uno])
-                {
-                    salida.Append(string.Format("{0} {1} receive {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.bitentrada));
-                }
-                else
-                {
-                    salida.Append(string.Format("{0} {1} send {2} \n", Program.current_time, this.Name + $"_{i + 1}", (int)this.bitentrada)); 
-                }
-            }
-
-            while (salida.Length>1 && salida[salida.Length - 1] == '\n')
-                salida.Remove(salida.Length - 1, 1);
-
-            //EscribirEnLaSalida(salida.ToString()); 
-           
+            EscribirEnLaSalida(this.ToString(), this.name + ".txt"); 
         }
-
-
-        /// <summary>
-        /// esto limpia el array de bit recibido por las computadoras en un 
-        /// mili segundo determinado 
-        /// </summary>
-        //public void LimpiarLosParametrosDeEntrada()
-        //{
-
-        //    foreach (var item in this.PuertosConectados)
-        //    {
-        //        item.LimpiarEntradas();
-        //    }
-
-        //    this.BitdeEntrada = Bit.none; 
-        //}
 
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            stringBuilder.Append($"{this.name} \n");
+            var history = new List<OneBitPackage>();
 
-            //stringBuilder.Append($"Bit de Salida:\t {(int)this.BitdeSalida}\n");
-
-            stringBuilder.Append($"Bit de Entradas:\n");
-
-            foreach (var item in this.PuertosConectados)            
+            foreach (var port in this.puertos)
             {
-                for (int j = 0; j < item.Entradas.Length; j++)
-                {
-                    stringBuilder.Append($"{ (item.Entradas[j] == true ?"T" : "F")}  ");
-                }
-                stringBuilder.Append(Environment.NewLine);
+                history.AddRange(port.GiveMeHistory); 
             }
 
-            stringBuilder.Append(Environment.NewLine);
 
-            return stringBuilder.ToString();
+            foreach (var item in history.OrderBy(x => x.Time))
+            {
+                stringBuilder.AppendLine(item.ToString());
+                
+            }
+
+            return stringBuilder.ToString(); 
         }
-
-
 
     }
 }

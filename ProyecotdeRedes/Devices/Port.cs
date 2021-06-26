@@ -8,20 +8,20 @@ using Byte = ProyecotdeRedes.Component.Byte;
 
 namespace ProyecotdeRedes.Devices
 {
-    public class Puerto:IPuertos
+    public class Port:IPuertos
     {
         /// <summary>
         /// esto es para representar le id que tiene el puerto en
         /// el dispositivo al que pertenece 
         /// </summary>
-        string id_puerto;   
+        string port_id;   
         
 
         /// <summary>
         /// Este es para representar el nombre del puerto
         /// con el id correspondiente
         /// </summary>
-        int numero_puerto;
+        int port_number;
 
 
 
@@ -31,10 +31,7 @@ namespace ProyecotdeRedes.Devices
         Bit _outBit;
 
 
-        /// <summary>
-        /// Esto es para representar los bits de entrada por el puerto 
-        /// </summary>
-        //Queue<Bit> queueinput;
+       
 
 
         /// <summary>
@@ -46,7 +43,7 @@ namespace ProyecotdeRedes.Devices
         Bit _inBit; 
 
 
-        Dispositivo _dispPertenece;
+        Dispositivo _divice_belongs;
 
 
         string _dirMac; 
@@ -55,26 +52,16 @@ namespace ProyecotdeRedes.Devices
         /// Esto es para saber que bits se han recibido de alguna 
         /// computadora en especifico en un mili segundo determinado
         /// </summary>
-        bool[] entradas;
+        //bool[] entradas;
 
 
         /// <summary>
         /// esto es para saber si el dispositivo esta conectado con algún 
         /// otro dispositivo 
         /// </summary>
-        bool estaConectado;
+        //bool estaConectado;
 
        
-
-        /// <summary>
-        /// Esto te retorna el indice del puerto al que esta conectado 
-        /// el dispositivo por el puerto actual 
-        /// </summary>
-        public int NumeroPuertoAlQueEstaConectado
-        {
-            get => this.giveMePuertoConectado.numero_puerto;
-        }
-
         /// <summary>
         /// Esto te desconecta el puerto actual de cualquier otro puerto 
         /// al que se encuentre conectado 
@@ -100,18 +87,10 @@ namespace ProyecotdeRedes.Devices
             return true; 
         }
 
-        //public void DesconectarElPuerto()
-        //{
-        //    //this.puertoalqueestaconectado = null;
-        //    this._outBit = Bit.none;
-        //    this.estaConectado = false;
-
-        //    LimpiarEntradas(); 
-        //}
-
-        public int NumeroPuerto
+        
+        public int PortNumber
         {
-            get => this.numero_puerto;
+            get => this.port_number;
         }
 
         /// <summary>
@@ -119,17 +98,17 @@ namespace ProyecotdeRedes.Devices
         /// </summary>
         /// <param name="id_puerto"></param>
         /// <param name="numero_puerto"></param>
-        public Puerto (string id_puerto , int numero_puerto,Dispositivo dispositivo)
+        public Port (string id_puerto , int numero_puerto,Dispositivo dispositivo)
         {
-            this.id_puerto = id_puerto;
+            this.port_id = id_puerto;
             this._outBit = Bit.none;
-            this.numero_puerto = numero_puerto;
+            this.port_number = numero_puerto;
             this._cable = null;
-            this._dispPertenece = dispositivo;
+            this._divice_belongs = dispositivo;
             this.queueoutput = new Queue<Bit>();
             this._history = new List<OneBitPackage>(); 
 
-            entradas = new bool[Enum.GetNames(typeof(Bit)).Length];
+            //entradas = new bool[Enum.GetNames(typeof(Bit)).Length];
         }
 
 
@@ -143,28 +122,12 @@ namespace ProyecotdeRedes.Devices
 
         public Dispositivo DispPertenece
         {
-            get => this._dispPertenece;
+            get => this._divice_belongs;
         }
 
-        public Puerto giveMePuertoConectado
+        public List<OneBitPackage> GiveMeHistory 
         {
-            get
-            {
-                return _cable.puerto1.Equals(this) ?
-                    _cable.puerto2 : _cable.puerto1;
-            }
-        }
-
-        public Dispositivo giveMeDisposotivoConectado
-        {
-            get
-            {
-                Puerto puertoconectado = _cable.puerto1.Equals(this) ?
-                    _cable.puerto2 : _cable.puerto1;
-
-                return puertoconectado._dispPertenece;
-            }
-
+            get => this._history; 
         }
 
         public bool ConnectCableToPort (Cable cable)
@@ -177,21 +140,21 @@ namespace ProyecotdeRedes.Devices
             return true; 
         }
 
-        public bool EstaConectadoAOtroDispositivo
-        {
-            get => this.estaConectado;
-            set => this.estaConectado = value; 
-        }
+        //public bool EstaConectadoAOtroDispositivo
+        //{
+        //    get => this.estaConectado;
+        //    set => this.estaConectado = value; 
+        //}
        
         public string ID_Puerto
         {
-            get => this.id_puerto;
+            get => this.port_id;
         }
 
-        public int Numero_Puerto
-        {
-            get => this.numero_puerto; 
-        }
+        //public int Numero_Puerto
+        //{
+        //    get => this.numero_puerto; 
+        //}
 
         public Bit OutBit
         {
@@ -211,21 +174,21 @@ namespace ProyecotdeRedes.Devices
         /// Esto retorna las entradas que tiene el dispositivo 
         /// por el puerto actual en un mili segundo determinado
         /// </summary>
-        public bool [] Entradas
-        {
-            get => this.entradas; 
-        }
+        //public bool [] Entradas
+        //{
+        //    get => this.entradas; 
+        //}
 
 
         /// <summary>
         /// Este pone todas las entradas como si no hubiera recibido 
         /// ningún bit de información 
         /// </summary>
-        public void LimpiarEntradas()
-        {
-            for (int i = 0; i < this.entradas.Length; i++)
-                this.entradas[i] = false; 
-        }
+        //public void LimpiarEntradas()
+        //{
+        //    for (int i = 0; i < this.entradas.Length; i++)
+        //        this.entradas[i] = false; 
+        //}
 
         /// <summary>
         /// el time_sending me representa el tiempo en milisegundos que 
@@ -283,7 +246,8 @@ namespace ProyecotdeRedes.Devices
                 OneBitPackage bitreceived = new OneBitPackage(
                     Program.current_time,
                     Action.Received,
-                    this.InBit);
+                    this.InBit,
+                    port:this.port_id);
 
                 
 
@@ -298,7 +262,7 @@ namespace ProyecotdeRedes.Devices
 
                     
                     
-                    Console.WriteLine($"{this.id_puerto} received the byte: {oneBitPackage.ToString()} in time: {Program.current_time}");
+                    Console.WriteLine($"{this.port_id} received the byte: {oneBitPackage.ToString()} in time: {Program.current_time}");
                     time_received_byte = 0;
 
                     this.DispPertenece.BytesReceives.Add(oneBitPackage);
@@ -327,7 +291,7 @@ namespace ProyecotdeRedes.Devices
 
             OneBytePackage oneBytePackage = new OneBytePackage();
             oneBytePackage.Byte = @byte;
-            oneBytePackage.portreceived = this.id_puerto;
+            oneBytePackage.portreceived = this.port_id;
             oneBytePackage.time_received = Program.current_time;
 
             return oneBytePackage;
@@ -369,9 +333,10 @@ namespace ProyecotdeRedes.Devices
                                                                     time: Program.current_time,
                                                                     action: Action.Send,
                                                                     bit: this.OutBit,
-                                                                    actionResult: ActionResult.Ok);
+                                                                    actionResult: ActionResult.Ok , 
+                                                                    port: this.port_id);
 
-                    string salida = this.id_puerto + " ---> " +  oneBitPackage.ToString(); 
+                    string salida = this.port_id + " ---> " +  oneBitPackage.ToString(); 
 
                     Console.WriteLine(salida);
 
@@ -393,7 +358,7 @@ namespace ProyecotdeRedes.Devices
         {
             if (this._cable == null) return Bit.none; 
 
-            Puerto otherPort  = this._cable.puerto1.Equals(this) ?
+            Port otherPort  = this._cable.puerto1.Equals(this) ?
                 this._cable.puerto2:
                 this._cable.puerto1;
             return otherPort.GiveMeOutBit();
