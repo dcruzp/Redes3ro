@@ -208,8 +208,6 @@ namespace ProyecotdeRedes.Component
       return stringBuilder.ToString();
     }
 
-    
-
     public bool CheckIsOkData ()
     {
       var datatoCheck = AuxiliaryFunctions.ConvertToStringPackage(CheckData);
