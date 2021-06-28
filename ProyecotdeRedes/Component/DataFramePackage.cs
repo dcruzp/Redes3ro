@@ -20,7 +20,7 @@ namespace ProyecotdeRedes.Component
     int _lengthCheck = 0;
     bool _fullData = false;
     uint _timeReceived;
-    bool _IsOkData; 
+    bool _isOkData; 
 
     public DataFramePackage()
     {
@@ -80,7 +80,7 @@ namespace ProyecotdeRedes.Component
       {
         _timeReceived = Program.current_time;
         _fullData = true;
-        _IsOkData = CheckIsOkData(); 
+        _isOkData = CheckIsOkData(); 
       }
     }
 
@@ -201,7 +201,10 @@ namespace ProyecotdeRedes.Component
       stringBuilder.Append(AuxiliaryFunctions.FromByteDataToHexadecimal(MacOut));
       stringBuilder.Append(" ");
       stringBuilder.Append(AuxiliaryFunctions.FromByteDataToHexadecimal(Data));
-
+      if (!_isOkData)
+      {
+        stringBuilder.Append(" ERROR"); 
+      }
       return stringBuilder.ToString();
     }
 
