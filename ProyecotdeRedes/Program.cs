@@ -52,7 +52,12 @@ namespace ProyecotdeRedes
 
     static void Main(string[] args)
     {
-      RunAplication();
+      //RunAplication();
+
+      //var item = AuxiliaryFunctions.FromCharDataToHexadecimalData("ARPR");
+
+      //Console.WriteLine(item);
+
     }
 
 

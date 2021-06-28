@@ -39,18 +39,17 @@ namespace ProyecotdeRedes
 
     public override void ProcessDataReceived()
     {
-      //base.ProcessDataReceived();
+      string port = BytesReceives[BytesReceives.Count - 1].portreceived;
 
-      var datareceived = BytesReceives[BytesReceives.Count - 1];
-
-      var listBits = datareceived.Byte.GiveMeBits.ToList();
-
-      foreach (var item in ports)
+      if (currentBuildInFrame.FullData)
       {
-        if (item.PortNumber == int.Parse(datareceived.portreceived.Split('_')[1]))
-          continue;
+        foreach (var item in ports)
+        {
+          if (item.PortNumber == int.Parse(port.Split('_')[1]))
+            continue;
 
-        item.SendData(listBits);
+          item.SendData(currentBuildInFrame.GetAllDataFrame());
+        }
       }
 
     }

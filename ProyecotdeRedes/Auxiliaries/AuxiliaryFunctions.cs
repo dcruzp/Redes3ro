@@ -256,6 +256,27 @@ $"Binario a Hexadecimal porque no hay una 4 bits para determinar un digito en He
       return sumdatahexadecimal.ToString();
     }
 
+    /// <summary>
+    /// Esta funcion recibe una string que representa los datos que 
+    /// se van a transformar en Hexadecimal. Lo que hace basicamente es
+    /// coger cada uno de los caracteres y obtener su representacion en 
+    /// hexadecimal y con esta informacion conformar el string de salida 
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    public static string FromCharDataToHexadecimalData (string data)
+    {
+      StringBuilder stringBuilder = new StringBuilder();
+      
+      foreach (var item in data)
+      {
+        var aux = new StringBuilder(Convert.ToString((int)item, 16));
+        aux.Insert(0, "0", aux.Length % 2);
+        stringBuilder.Append(aux);
+      }
+      return stringBuilder.ToString(); 
+    }
+
 
     /// <summary>
     /// Esto retorna una lista de Bits que tiene la secuencia de 

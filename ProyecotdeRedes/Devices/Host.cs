@@ -7,39 +7,16 @@ namespace ProyecotdeRedes
 {
   class Host : Device
   {
-    /// <summary>
-    /// Esto es una cola para almacenar los bits que quedan 
-    /// por enviar aun. Si la cola esta vacía es que no quedan 
-    /// bit por enviar. 
-    /// </summary>
-    //Queue<Bit> porenviar;
-
-
-
-
+    
 
     /// <summary>
     /// Esta es la dirección Max representada en hexadecimal 
     /// </summary>
-    string direccionMax;
-
-
-
-
-
-
-
-    /// <summary>
-    /// esto es para determinar el tiempo que ha estado la
-    /// computadora sin enviar información producto de una 
-    /// colisión que detecto anteriormente
-    /// </summary>
-    uint tiempoesperandoparavolveraenviar;
+    string macDirection;
 
     public Host(string name, int indice) : base(name, 1, indice)
     {
-      //this.porenviar = new Queue<Bit>();
-      direccionMax = null;
+      macDirection = null;
     }
 
 
@@ -50,9 +27,9 @@ namespace ProyecotdeRedes
     /// <param name="dirMac"></param>
     public void PutMacDirection(string dirMac)
     {
-      if (direccionMax == null && CheckMetods.CheckIsOkDirMac(dirMac))
+      if (macDirection == null && CheckMetods.CheckIsOkDirMac(dirMac))
       {
-        direccionMax = dirMac;
+        macDirection = dirMac;
       }
       else
       {
@@ -76,7 +53,7 @@ namespace ProyecotdeRedes
 
       var dirmacin = string.IsNullOrEmpty(mac) ? "FFFF" : mac;
 
-      var dirmacout = string.IsNullOrEmpty(direccionMax) ? "FFFF" : direccionMax;
+      var dirmacout = string.IsNullOrEmpty(macDirection) ? "FFFF" : macDirection;
 
       var lenghtdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(data);
 
@@ -85,7 +62,12 @@ namespace ProyecotdeRedes
 
       var lenghtsumdatahex = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(sumdatahex);
 
-      var packagetosend = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(dirmacin, dirmacout, lenghtdata, lenghtsumdatahex, data, sumdatahex);
+      var packagetosend = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(dirmacin, 
+                                                                                   dirmacout, 
+                                                                                   lenghtdata, 
+                                                                                   lenghtsumdatahex, 
+                                                                                   data, 
+                                                                                   sumdatahex);
 
 
       foreach (var item in ports)
@@ -97,9 +79,6 @@ namespace ProyecotdeRedes
           $"paquete {AuxiliaryFunctions.FromByteDataToHexadecimal(packagetosend)}");
 
     }
-
-
-
 
 
     /// <summary>
@@ -114,8 +93,6 @@ namespace ProyecotdeRedes
         item.SendData(pakage);
       }
     }
-
-
 
     public override void ProcessDataReceived()
     {
@@ -140,5 +117,34 @@ namespace ProyecotdeRedes
 
       EscribirEnLaSalida(dataFrame, name + "_data.txt");
     }
+
+
+    public List<Bit> createSpecialFrame (string destination_ip)
+    {
+      //directions 
+      var destination_mac = "FFFF";
+      var origin_mac = this.macDirection;
+
+      //data
+      var first4bytesofdata = AuxiliaryFunctions.FromCharDataToHexadecimalData("ARPQ");
+      var last4bytesofdata = destination_ip;
+           
+      var data = first4bytesofdata + last4bytesofdata;
+      var lenghtdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(data);
+
+      //verification
+      var sumdata = AuxiliaryFunctions.SumOfDataInHex(data);
+      var lenghtsumdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(sumdata);
+
+      //frame 
+      var frame = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(destination_mac,
+                                                                           origin_mac,
+                                                                           lenghtdata,
+                                                                           lenghtsumdata,
+                                                                           data,
+                                                                           sumdata);
+      return frame; 
+    }
+
   }
 }
