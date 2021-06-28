@@ -35,9 +35,4 @@ En el fichero *config.txt* se pueden ajustar varios parámetros para corres el p
 
 3. **max_cantidad_milisegundos**: Este parámetro es la cantidad máxima de mili-segundos que correrá el programa , después de este tiempo el programa finaliza sin ejecutar ninguna otra instrucción. 
 
-#### Link del repositorio 
-Aquí voy a dejar el link del repositorio donde se encuentra el repositorio donde esta el proyecto
-
-- [Proyecto de Redes](https://github.com/dcruzp/Redes3ro)
-
 
