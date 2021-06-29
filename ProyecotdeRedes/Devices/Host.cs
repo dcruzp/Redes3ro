@@ -7,7 +7,11 @@ namespace ProyecotdeRedes
 {
   class Host : Device
   {
-    
+    /// <summary>
+    /// Esto es para representar la direccion ip y la 
+    /// mascara del dispositivo en formato "entendible para los humanos"
+    /// </summary>
+    Tuple<String, String> ip_mask;  
 
     /// <summary>
     /// Esta es la dirección Max representada en hexadecimal 
@@ -119,7 +123,7 @@ namespace ProyecotdeRedes
     }
 
 
-    public List<Bit> createSpecialFrame (string destination_ip)
+    public List<Bit> createSpecialFrameQuery (string destination_ip)
     {
       //directions 
       var destination_mac = "FFFF";
@@ -137,6 +141,33 @@ namespace ProyecotdeRedes
       var lenghtsumdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(sumdata);
 
       //frame 
+      var frame = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(destination_mac,
+                                                                           origin_mac,
+                                                                           lenghtdata,
+                                                                           lenghtsumdata,
+                                                                           data,
+                                                                           sumdata);
+      return frame; 
+    }
+
+    public List<Bit> createSpecialFrameResponse (string destination_mac_direction)
+    {
+      //directions
+      var destination_mac = destination_mac_direction;
+      var origin_mac = this.macDirection;
+
+      //data 
+      var first4bytesofdata = AuxiliaryFunctions.FromBinaryCadenaToHexadecimalDigit("ARPR");
+      var last4bytesofdata = this.ip_mask.Item1;
+
+      var data = first4bytesofdata + last4bytesofdata;
+      var lenghtdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(data);
+
+      //verification 
+      var sumdata = AuxiliaryFunctions.SumOfDataInHex(data);
+      var lenghtsumdata = AuxiliaryFunctions.SumOfDataInHex(sumdata);
+
+      //frame
       var frame = AuxiliaryFunctions.ConvertToListOfBitHexadecimalSequence(destination_mac,
                                                                            origin_mac,
                                                                            lenghtdata,
