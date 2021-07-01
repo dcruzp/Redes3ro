@@ -52,11 +52,26 @@ namespace ProyecotdeRedes
 
     static void Main(string[] args)
     {
-      //RunAplication();
+      RunAplication();
 
-      //var item = AuxiliaryFunctions.FromCharDataToHexadecimalData("ARPR");
+      //IP ip1 = new IP("10.0.0.1", System.Globalization.NumberStyles.None);
+      //IP ip2 = new IP("10.0.0.2", System.Globalization.NumberStyles.None);
+      //IP ip3 = new IP("10.0.0.3", System.Globalization.NumberStyles.None);
 
-      //Console.WriteLine(item);
+      //Dictionary<IP, List<String>> keyValuePairs = new Dictionary<IP, List<string>>();
+
+      //keyValuePairs.Add(ip1, new List<string>() { "AAAAAAAAAAA", "BBBBBBBBBB000011" });
+      //keyValuePairs.Add(ip2, new List<string>() { "DDDDDDDDDDD" });
+      //keyValuePairs.Add(ip3, new List<string>() { "CCCCCCCCCCCC" });
+
+      //var datatosend = keyValuePairs[ip1];
+
+
+
+      //foreach (var item in datatosend)
+      //{
+      //  Console.WriteLine(item);
+      //}
 
     }
 
@@ -386,6 +401,34 @@ namespace ProyecotdeRedes
         }
 
         comp.send_frame(dirMacToSend, dataToSend);
+      }
+
+      else if (tipoinstruccion == TipodeInstruccion.ip)
+      {
+        if (instruccionpartida.Length < 5)
+        {
+          throw new InvalidCastException($"La instruccion mac '{_instruccion}' no tiene un formato valido");
+        }
+
+        var hostname = instruccionpartida[2].Split(':',' ').FirstOrDefault(); 
+
+        Device disp = dispositivos.Where(x => x.Name == hostname).FirstOrDefault();
+
+        Host _host = null;
+
+        if (disp is Host)
+          _host = disp as Host;
+
+        if (_host is null)
+        {
+          throw new NullReferenceException($"No se puede encontrar el Host '{instruccionpartida[2]}' en los dispositivos actuales");
+        }
+
+        var ipaddress = instruccionpartida[3];
+        var mask = instruccionpartida[4];
+
+        _host.TakeIpAndMaskAddres(ipaddress, mask); 
+
       }
     }
 

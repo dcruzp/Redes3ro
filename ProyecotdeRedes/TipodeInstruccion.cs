@@ -7,6 +7,7 @@
     send = 2,
     disconnect = 3,
     mac = 4,
-    send_frame = 5
+    send_frame = 5,
+    ip = 6 
   }
 }

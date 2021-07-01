@@ -173,6 +173,8 @@ $"Binario a Hexadecimal porque no hay una 4 bits para determinar un digito en He
           return TipodeInstruccion.mac;
         case "send_frame":
           return TipodeInstruccion.send_frame;
+        case "ip":
+          return TipodeInstruccion.ip;
         default:
           throw new InvalidCastException($" '{instruction}' no ese un tipo de instrucción valida");
       }
@@ -214,13 +216,15 @@ $"Binario a Hexadecimal porque no hay una 4 bits para determinar un digito en He
 
     public static IEnumerable<String> SplitStrInSubStrWithLength(string hexadecimal)
     {
+      if (hexadecimal.Length % 2 != 0)
+        throw new IndexOutOfRangeException($"To Split de str Hex in number Hex the length of " +
+          $"{hexadecimal} must be divisible by 2"); 
+
       StringBuilder stringBuilder = new StringBuilder(2);
       for (int i = 0; i < hexadecimal.Length; i += 2)
       {
         stringBuilder.Clear();
-
-        stringBuilder.Append(hexadecimal[i]);
-        stringBuilder.Append(hexadecimal[i + 1]);
+        stringBuilder.Append(hexadecimal.Substring(i,2));
 
         yield return stringBuilder.ToString();
       }
