@@ -1,6 +1,6 @@
 ﻿namespace ProyecotdeRedes
 {
-  public enum TipodeInstruccion
+  public enum InstructionType
   {
     create = 0,
     connect = 1,
@@ -8,6 +8,7 @@
     disconnect = 3,
     mac = 4,
     send_frame = 5,
-    ip = 6 
+    ip = 6,
+    send_packet = 7
   }
 }

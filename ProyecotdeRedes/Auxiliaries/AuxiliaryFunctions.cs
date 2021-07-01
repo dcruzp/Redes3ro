@@ -157,24 +157,26 @@ $"Binario a Hexadecimal porque no hay una 4 bits para determinar un digito en He
 
     }
 
-    public static TipodeInstruccion GiveMeTheInstruction(string instruction)
+    public static InstructionType GiveMeTheInstruction(string instruction)
     {
       switch (instruction)
       {
         case "create":
-          return TipodeInstruccion.create;
+          return InstructionType.create;
         case "connect":
-          return TipodeInstruccion.connect;
+          return InstructionType.connect;
         case "send":
-          return TipodeInstruccion.send;
+          return InstructionType.send;
         case "disconnect":
-          return TipodeInstruccion.disconnect;
+          return InstructionType.disconnect;
         case "mac":
-          return TipodeInstruccion.mac;
+          return InstructionType.mac;
         case "send_frame":
-          return TipodeInstruccion.send_frame;
+          return InstructionType.send_frame;
         case "ip":
-          return TipodeInstruccion.ip;
+          return InstructionType.ip;
+        case "send_packet":
+          return InstructionType.send_packet;
         default:
           throw new InvalidCastException($" '{instruction}' no ese un tipo de instrucción valida");
       }

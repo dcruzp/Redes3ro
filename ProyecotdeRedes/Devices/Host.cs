@@ -18,11 +18,11 @@ namespace ProyecotdeRedes
     /// <summary>
     /// Esta es la dirección Max representada en hexadecimal 
     /// </summary>
-    string macDirection;
+    string mac_direction;
 
     public Host(string name, int indice) : base(name, 1, indice)
     {
-      macDirection = null;
+      mac_direction = null;
       packages_to_send = new Dictionary<IP,List<string>>(); 
     }
 
@@ -44,9 +44,9 @@ namespace ProyecotdeRedes
     /// <param name="dirMac"></param>
     public void PutMacDirection(string dirMac)
     {
-      if (macDirection == null && CheckMetods.CheckIsOkDirMac(dirMac))
+      if (mac_direction == null && CheckMetods.CheckIsOkDirMac(dirMac))
       {
-        macDirection = dirMac;
+        mac_direction = dirMac;
       }
       else
       {
@@ -70,7 +70,7 @@ namespace ProyecotdeRedes
 
       var dirmacin = string.IsNullOrEmpty(mac) ? "FFFF" : mac;
 
-      var dirmacout = string.IsNullOrEmpty(macDirection) ? "FFFF" : macDirection;
+      var dirmacout = string.IsNullOrEmpty(mac_direction) ? "FFFF" : mac_direction;
 
       var lenghtdata = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(data);
 
@@ -97,6 +97,26 @@ namespace ProyecotdeRedes
 
     }
 
+    public void send_packet (string ip , string data )
+    {
+      //direction ip to send the data 
+      IP _ip = new IP(ip, System.Globalization.NumberStyles.None);
+
+
+      var query = createSpecialFrameQuery(_ip.GiveMeStringFormat("X2"));
+
+      if (!packages_to_send.ContainsKey(_ip))
+      {
+        packages_to_send.Add(_ip, new List<string>()); 
+      }
+
+      packages_to_send[_ip].Add(data); 
+      
+      foreach (var item in this.ports)
+      {
+        item.SendData(query); 
+      }
+    }
 
     /// <summary>
     /// Este método se llama cuando hubo una instrucción 
@@ -162,10 +182,27 @@ namespace ProyecotdeRedes
       var mac_in = AuxiliaryFunctions.FromByteDataToHexadecimal(frame.MacOut);
 
       //Getting all data that computer must be send to this direcction mac
-      List<String> data_to_send = packages_to_send.ContainsKey(ip)? packages_to_send[ip] : new List<string>();
 
+      List<String> data_to_send = new List<string>(); 
+
+
+      if (packages_to_send.ContainsKey(ip))
+      {
+        data_to_send = packages_to_send[ip]; 
+      }
+
+
+
+
+
+      //List<String> data_to_send = packages_to_send.ContainsKey(ip)? packages_to_send[ip] : new List<string>();
+
+      
+      
+      
+      
       //Sending all data to computer whit mac 'mac_in'
-      foreach (var item in data_to_send)
+      foreach (var item in data_to_send) 
       {
         this.send_frame(mac_in, item); 
       }
@@ -223,7 +260,7 @@ namespace ProyecotdeRedes
     {
       //directions 
       var destination_mac = "FFFF";
-      var origin_mac = this.macDirection;
+      var origin_mac = this.mac_direction;
 
       //data
       var first4bytesofdata = AuxiliaryFunctions.FromCharDataToHexadecimalData("ARPQ");
@@ -250,7 +287,7 @@ namespace ProyecotdeRedes
     {
       //directions
       var destination_mac = destination_mac_direction;
-      var origin_mac = this.macDirection;
+      var origin_mac = this.mac_direction;
 
       //data 
       var first4bytesofdata = AuxiliaryFunctions.FromCharDataToHexadecimalData("ARPR");

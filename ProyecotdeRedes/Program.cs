@@ -52,26 +52,25 @@ namespace ProyecotdeRedes
 
     static void Main(string[] args)
     {
-      RunAplication();
+      //RunAplication();
 
-      //IP ip1 = new IP("10.0.0.1", System.Globalization.NumberStyles.None);
-      //IP ip2 = new IP("10.0.0.2", System.Globalization.NumberStyles.None);
-      //IP ip3 = new IP("10.0.0.3", System.Globalization.NumberStyles.None);
+      IP ip1 = new IP("10.0.0.1", System.Globalization.NumberStyles.None);
+      IP ip2 = new IP("10.0.0.2", System.Globalization.NumberStyles.None);
+      IP ip3 = new IP("10.0.0.3", System.Globalization.NumberStyles.None);
 
-      //Dictionary<IP, List<String>> keyValuePairs = new Dictionary<IP, List<string>>();
+      Dictionary<IP, List<String>> keyValuePairs = new Dictionary<IP, List<string>>();
 
-      //keyValuePairs.Add(ip1, new List<string>() { "AAAAAAAAAAA", "BBBBBBBBBB000011" });
-      //keyValuePairs.Add(ip2, new List<string>() { "DDDDDDDDDDD" });
-      //keyValuePairs.Add(ip3, new List<string>() { "CCCCCCCCCCCC" });
+      keyValuePairs.Add(ip1, new List<string>() { "AAAAAAAAAAA", "BBBBBBBBBB000011" });
+      keyValuePairs.Add(ip2, new List<string>() { "DDDDDDDDDDD" });
+      keyValuePairs.Add(ip3, new List<string>() { "CCCCCCCCCCCC" });
 
-      //var datatosend = keyValuePairs[ip1];
+      var datatosend = keyValuePairs[ip1];
 
 
-
-      //foreach (var item in datatosend)
-      //{
-      //  Console.WriteLine(item);
-      //}
+      foreach (var item in datatosend)
+      {
+        Console.WriteLine(item);
+      }
 
     }
 
@@ -171,9 +170,9 @@ namespace ProyecotdeRedes
       if (instruccionpartida.Length < 2)
         EnviromentActions.LanzarExepciondeCasteo(instruccion);
 
-      TipodeInstruccion tipoinstruccion = AuxiliaryFunctions.GiveMeTheInstruction(instruccionpartida[1]);
+      InstructionType tipoinstruccion = AuxiliaryFunctions.GiveMeTheInstruction(instruccionpartida[1]);
 
-      if (tipoinstruccion == TipodeInstruccion.create)
+      if (tipoinstruccion == InstructionType.create)
       {
         if (instruccionpartida.Length < 4)
           EnviromentActions.LanzarExepciondeCasteo(instruccion);
@@ -233,7 +232,7 @@ namespace ProyecotdeRedes
         }
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.connect)
+      else if (tipoinstruccion == InstructionType.connect)
       {
         if (instruccionpartida.Length < 4)
           EnviromentActions.LanzarExepciondeCasteo(instruccion);
@@ -276,7 +275,7 @@ namespace ProyecotdeRedes
 
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.send)
+      else if (tipoinstruccion == InstructionType.send)
       {
         if (instruccionpartida.Length < 4)
           EnviromentActions.LanzarExepciondeCasteo(instruccion);
@@ -311,7 +310,7 @@ namespace ProyecotdeRedes
         computadora.send(paquetedebits);
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.disconnect)
+      else if (tipoinstruccion == InstructionType.disconnect)
       {
         if (instruccionpartida.Length < 4)
           EnviromentActions.LanzarExepciondeCasteo(instruccion);
@@ -338,7 +337,7 @@ namespace ProyecotdeRedes
         p2.Cable = null;
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.mac)
+      else if (tipoinstruccion == InstructionType.mac)
       {
         if (instruccionpartida.Length < 4)
         {
@@ -367,7 +366,7 @@ namespace ProyecotdeRedes
         comp.PutMacDirection(dirMac);
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.send_frame)
+      else if (tipoinstruccion == InstructionType.send_frame)
       {
         if (instruccionpartida.Length < 5)
         {
@@ -403,7 +402,7 @@ namespace ProyecotdeRedes
         comp.send_frame(dirMacToSend, dataToSend);
       }
 
-      else if (tipoinstruccion == TipodeInstruccion.ip)
+      else if (tipoinstruccion == InstructionType.ip)
       {
         if (instruccionpartida.Length < 5)
         {
@@ -429,6 +428,31 @@ namespace ProyecotdeRedes
 
         _host.TakeIpAndMaskAddres(ipaddress, mask); 
 
+      }
+
+      else if (tipoinstruccion == InstructionType.send_packet)
+      {
+        if (instruccionpartida.Length < 5)
+        {
+          throw new InvalidCastException($"La instruccion send_packet '{_instruccion}' no tiene un formato valido");
+        }
+
+        var hostname = instruccionpartida[2].Split(':', ' ').FirstOrDefault();
+
+        Device disp = dispositivos.Where(x => x.Name == hostname).FirstOrDefault();
+
+        Host _host = disp as Host;
+
+        if (_host is null)
+        {
+          throw new NullReferenceException($"No se puede encontrar el Host '{instruccionpartida[2]}' en los dispositivos actuales");
+        }
+
+        IP _ip = new IP(instruccionpartida[3], System.Globalization.NumberStyles.None);
+
+        var data = instruccionpartida[4];
+
+        _host.send_packet(_ip.ToString(), data); 
       }
     }
 
