@@ -52,25 +52,27 @@ namespace ProyecotdeRedes
 
     static void Main(string[] args)
     {
-      //RunAplication();
+      RunAplication();
 
-      IP ip1 = new IP("10.0.0.1", System.Globalization.NumberStyles.None);
-      IP ip2 = new IP("10.0.0.2", System.Globalization.NumberStyles.None);
-      IP ip3 = new IP("10.0.0.3", System.Globalization.NumberStyles.None);
+      //IP ip1 = new IP("10.0.0.1", System.Globalization.NumberStyles.None);
+      //IP ip2 = new IP("10.0.0.2", System.Globalization.NumberStyles.None);
+      //IP ip3 = new IP("10.0.0.3", System.Globalization.NumberStyles.None);
 
-      Dictionary<IP, List<String>> keyValuePairs = new Dictionary<IP, List<string>>();
+      //Dictionary<IP, List<String>> keyValuePairs = new Dictionary<IP, List<string>>();
 
-      keyValuePairs.Add(ip1, new List<string>() { "AAAAAAAAAAA", "BBBBBBBBBB000011" });
-      keyValuePairs.Add(ip2, new List<string>() { "DDDDDDDDDDD" });
-      keyValuePairs.Add(ip3, new List<string>() { "CCCCCCCCCCCC" });
-
-      var datatosend = keyValuePairs[ip1];
+      //keyValuePairs.Add(ip1, new List<string>() { "AAAAAAAAAAA", "BBBBBBBBBB000011" });
+      //keyValuePairs.Add(ip2, new List<string>() { "DDDDDDDDDDD" });
+      //keyValuePairs.Add(ip3, new List<string>() { "CCCCCCCCCCCC" });
 
 
-      foreach (var item in datatosend)
-      {
-        Console.WriteLine(item);
-      }
+
+      //var datatosend = keyValuePairs[ip2];
+
+
+      //foreach (var item in datatosend)
+      //{
+      //  Console.WriteLine(item);
+      //}
 
     }
 

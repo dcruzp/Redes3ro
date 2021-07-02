@@ -2,6 +2,7 @@
 using ProyecotdeRedes.Component;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace ProyecotdeRedes
 {
@@ -13,7 +14,7 @@ namespace ProyecotdeRedes
     /// </summary>
     Tuple<IP, Mask> ip_mask;
 
-    Dictionary<IP, List<String>> packages_to_send; 
+    Dictionary<string, List<String>> packages_to_send; 
 
     /// <summary>
     /// Esta es la dirección Max representada en hexadecimal 
@@ -23,7 +24,7 @@ namespace ProyecotdeRedes
     public Host(string name, int indice) : base(name, 1, indice)
     {
       mac_direction = null;
-      packages_to_send = new Dictionary<IP,List<string>>(); 
+      packages_to_send = new Dictionary<string,List<string>>(); 
     }
 
 
@@ -105,17 +106,43 @@ namespace ProyecotdeRedes
 
       var query = createSpecialFrameQuery(_ip.GiveMeStringFormat("X2"));
 
-      if (!packages_to_send.ContainsKey(_ip))
+      if (!packages_to_send.ContainsKey(ip))
       {
-        packages_to_send.Add(_ip, new List<string>()); 
+        packages_to_send.Add(ip, new List<string>()); 
       }
 
-      packages_to_send[_ip].Add(data); 
+      packages_to_send[ip].Add(data); 
       
       foreach (var item in this.ports)
       {
         item.SendData(query); 
       }
+    }
+
+    public string BuidPacketToSend(string ip, string data)
+    {
+      string destination_ip = new IP(ip, System.Globalization.NumberStyles.None).GiveMeStringFormat("X2");
+      string origin_ip = this.ip_mask.Item1.GiveMeStringFormat("X2");
+
+      string tlt = "00";
+      string protocol = "00";
+
+      string payload_size = AuxiliaryFunctions.GiveMeLenghtInHexadecimal(data);
+
+      if (payload_size.Length != 2)
+        throw new Exception($"the lenght of data '{data}' out of range of byte ");
+
+      StringBuilder stringBuilder = new StringBuilder();
+
+      stringBuilder.Append(destination_ip);
+      stringBuilder.Append(origin_ip);
+      stringBuilder.Append(tlt);
+      stringBuilder.Append(protocol);
+      stringBuilder.Append(payload_size);
+      stringBuilder.Append(data);
+
+      return stringBuilder.ToString(); 
+
     }
 
     /// <summary>
@@ -185,21 +212,10 @@ namespace ProyecotdeRedes
 
       List<String> data_to_send = new List<string>(); 
 
-
-      if (packages_to_send.ContainsKey(ip))
+      if (packages_to_send.ContainsKey(ip.ToString()))
       {
-        data_to_send = packages_to_send[ip]; 
-      }
-
-
-
-
-
-      //List<String> data_to_send = packages_to_send.ContainsKey(ip)? packages_to_send[ip] : new List<string>();
-
-      
-      
-      
+        data_to_send = packages_to_send[ip.ToString()]; 
+      }      
       
       //Sending all data to computer whit mac 'mac_in'
       foreach (var item in data_to_send) 
@@ -208,9 +224,9 @@ namespace ProyecotdeRedes
       }
 
       //updating the dictionary 
-      if (packages_to_send.ContainsKey(ip))
+      if (packages_to_send.ContainsKey(ip.ToString()))
       {
-        packages_to_send.Remove(ip); 
+        packages_to_send.Remove(ip.ToString());
       }
 
       return true; 
