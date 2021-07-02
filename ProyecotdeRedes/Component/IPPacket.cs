@@ -27,9 +27,22 @@ namespace ProyecotdeRedes.Component
       this.data = new List<byte>(); 
     }
 
-    public IPPacket(List<byte> bytes):base()
+   
+    public byte [] Data
     {
-      data.AddRange(bytes);
+      get => this.data.GetRange(index_lenght_data.Item1, index_lenght_data.Item2).ToArray();
+    }
+
+    public IP OriginIp
+    {
+      get
+      {
+        var bytesIp = data.GetRange(index_lenght_orig_ip.Item1, index_lenght_orig_ip.Item2);
+        IP iP = new IP(bytesIp.ToArray());
+
+        return iP; 
+      }
+      
     }
 
     public bool CheckDataIsOk()
@@ -52,7 +65,7 @@ namespace ProyecotdeRedes.Component
     {
       if (data.Count == 10)
       {
-        index_lenght_data  = new Tuple<int, int>(10,@byte); 
+        index_lenght_data  = new Tuple<int, int>(11,@byte); 
       }
       else if (data.Count > 11)
       {

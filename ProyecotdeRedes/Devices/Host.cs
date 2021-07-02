@@ -103,7 +103,6 @@ namespace ProyecotdeRedes
       //direction ip to send the data 
       IP _ip = new IP(ip, System.Globalization.NumberStyles.None);
 
-
       var query = createSpecialFrameQuery(_ip.GiveMeStringFormat("X2"));
 
       if (!packages_to_send.ContainsKey(ip))
@@ -111,7 +110,9 @@ namespace ProyecotdeRedes
         packages_to_send.Add(ip, new List<string>()); 
       }
 
-      packages_to_send[ip].Add(data); 
+      var ip_packet = BuidPacketToSend(ip, data); 
+
+      packages_to_send[ip].Add(ip_packet); 
       
       foreach (var item in this.ports)
       {
@@ -173,6 +174,15 @@ namespace ProyecotdeRedes
         var is_request_query = CheckIsFrameReceivedIsSprecialFrameQuery(currentBuildInFrame);
         var is_request_response = CheckIsFrameReceivedIsSpecialFrameResponse(currentBuildInFrame);
 
+        if (is_ok_data && ! is_request_query && ! is_request_response)
+        {
+          var data_ip_packet = ReadIPPacket(currentBuildInFrame);
+          Console.WriteLine(data_ip_packet);
+
+          WriteIpPacketReceivedInOutput(currentBuildInFrame); 
+        }
+
+
         _history.Add(currentBuildInFrame);
         WriteDataReceivedInOutput(currentBuildInFrame);
 
@@ -180,6 +190,34 @@ namespace ProyecotdeRedes
       }
     }
 
+    public string ReadIPPacket (DataFramePackage frame)
+    {
+      var data = frame.Data;
+
+      var data_hexadecimal = AuxiliaryFunctions.FromByteDataToHexadecimal(data);
+
+      IPPacket iPPacket = new IPPacket(); 
+
+      foreach (var item in AuxiliaryFunctions.SplitStrInSubStrWithLength(data_hexadecimal))
+      {
+        byte aux_byte = System.Byte.Parse(item, System.Globalization.NumberStyles.HexNumber);
+        iPPacket.InsertNewByte(aux_byte); 
+      }
+
+      StringBuilder stringBuilder = new StringBuilder();
+
+      stringBuilder.Append(Program.current_time);
+      stringBuilder.Append(" ");
+      stringBuilder.Append(iPPacket.OriginIp.ToString());
+      stringBuilder.Append(" "); 
+
+      foreach (var item in iPPacket.Data)
+      {
+        stringBuilder.Append(item.ToString("X2")); 
+      }
+
+      return stringBuilder.ToString(); 
+    }
 
     private bool CheckIsFrameReceivedIsSpecialFrameResponse(DataFramePackage frame)
     {
@@ -261,11 +299,20 @@ namespace ProyecotdeRedes
       return true; 
     }
 
+    private void WriteIpPacketReceivedInOutput (DataFramePackage package)
+    {
+
+      var data_ip_packet = ReadIPPacket(currentBuildInFrame);
+
+
+      EscribirEnLaSalida(data_ip_packet, this.name + "_payload.txt");
+    }
+
     private void WriteDataReceivedInOutput(DataFramePackage package)
     {
-      uint time_received = package.TimeReceived;
-      string pcout = AuxiliaryFunctions.FromByteDataToHexadecimal(package.MacOut);
-      string data = AuxiliaryFunctions.FromByteDataToHexadecimal(package.Data);
+      //uint time_received = package.TimeReceived;
+      //string pcout = AuxiliaryFunctions.FromByteDataToHexadecimal(package.MacOut);
+      //string data = AuxiliaryFunctions.FromByteDataToHexadecimal(package.Data);
 
       string dataFrame = package.ToString();
 
